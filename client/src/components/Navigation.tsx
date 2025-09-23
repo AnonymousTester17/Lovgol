@@ -72,6 +72,13 @@ export default function Navigation() {
               >
                 Contact
               </button>
+              <button
+                onClick={() => window.location.href = '/blog'}
+                className="text-muted-foreground hover:text-primary transition-colors duration-200"
+                data-testid="nav-blog"
+              >
+                Blog
+              </button>
             </div>
           </div>
           
@@ -124,6 +131,13 @@ export default function Navigation() {
                 data-testid="mobile-nav-contact"
               >
                 Contact
+              </button>
+              <button
+                onClick={() => window.location.href = '/blog'}
+                className="block px-3 py-2 text-muted-foreground hover:text-primary w-full text-left"
+                data-testid="mobile-nav-blog"
+              >
+                Blog
               </button>
             </div>
           </div>

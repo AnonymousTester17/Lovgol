@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, json, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, json, timestamp, boolean } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -34,6 +34,21 @@ export const inquirySubmissions = pgTable("inquiry_submissions", {
   submittedAt: timestamp("submitted_at").defaultNow(),
 });
 
+export const blogPosts = pgTable("blog_posts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: text("title").notNull(),
+  slug: text("slug").notNull().unique(),
+  excerpt: text("excerpt").notNull(),
+  content: text("content").notNull(),
+  featuredImage: text("featured_image"),
+  category: text("category").notNull(),
+  tags: json("tags").$type<string[]>().notNull().default(sql`'[]'::json`),
+  isPublished: boolean("is_published").notNull().default(false),
+  publishedAt: timestamp("published_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 export const insertServicePreviewSchema = createInsertSchema(servicesPreviews).omit({
   id: true,
   createdAt: true,
@@ -50,9 +65,17 @@ export const insertInquirySubmissionSchema = createInsertSchema(inquirySubmissio
   submittedAt: true,
 });
 
+export const insertBlogPostSchema = createInsertSchema(blogPosts).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export type ServicePreview = typeof servicesPreviews.$inferSelect;
 export type InsertServicePreview = z.infer<typeof insertServicePreviewSchema>;
 export type ContactSubmission = typeof contactSubmissions.$inferSelect;
 export type InsertContactSubmission = z.infer<typeof insertContactSubmissionSchema>;
 export type InquirySubmission = typeof inquirySubmissions.$inferSelect;
 export type InsertInquirySubmission = z.infer<typeof insertInquirySubmissionSchema>;
+export type BlogPost = typeof blogPosts.$inferSelect;
+export type InsertBlogPost = z.infer<typeof insertBlogPostSchema>;

@@ -89,6 +89,7 @@ export default function Admin() {
             <TabsTrigger value="services" data-testid="tab-services">Services ({servicePreviews.length})</TabsTrigger>
             <TabsTrigger value="contacts" data-testid="tab-contacts">Contact Submissions ({contactSubmissions.length})</TabsTrigger>
             <TabsTrigger value="inquiries" data-testid="tab-inquiries">Inquiries ({inquirySubmissions.length})</TabsTrigger>
+            <TabsTrigger value="blog" data-testid="tab-blog">Blog Posts</TabsTrigger>
           </TabsList>
 
           <TabsContent value="services" className="space-y-6">
@@ -242,6 +243,16 @@ export default function Admin() {
                 ))}
               </div>
             )}
+          </TabsContent>
+
+          <TabsContent value="blog" className="space-y-6">
+            <div className="text-center py-8 text-muted-foreground">
+              Blog management coming soon! Blog posts are currently managed via API.
+              <br />
+              <span className="text-sm">
+                Use POST /api/blog-posts to create new posts programmatically.
+              </span>
+            </div>
           </TabsContent>
         </Tabs>
 

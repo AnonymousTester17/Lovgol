@@ -1,4 +1,4 @@
-import { type ServicePreview, type InsertServicePreview, type ContactSubmission, type InsertContactSubmission, type InquirySubmission, type InsertInquirySubmission } from "@shared/schema";
+import { type ServicePreview, type InsertServicePreview, type ContactSubmission, type InsertContactSubmission, type InquirySubmission, type InsertInquirySubmission, type BlogPost, type InsertBlogPost } from "@shared/schema";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
@@ -18,17 +18,28 @@ export interface IStorage {
   // Inquiry Submissions
   createInquirySubmission(submission: InsertInquirySubmission): Promise<InquirySubmission>;
   getInquirySubmissions(): Promise<InquirySubmission[]>;
+
+  // Blog Posts
+  getBlogPosts(): Promise<BlogPost[]>;
+  getPublishedBlogPosts(): Promise<BlogPost[]>;
+  getBlogPost(id: string): Promise<BlogPost | undefined>;
+  getBlogPostBySlug(slug: string): Promise<BlogPost | undefined>;
+  createBlogPost(post: InsertBlogPost): Promise<BlogPost>;
+  updateBlogPost(id: string, post: Partial<InsertBlogPost>): Promise<BlogPost>;
+  deleteBlogPost(id: string): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
   private servicePreviews: Map<string, ServicePreview>;
   private contactSubmissions: Map<string, ContactSubmission>;
   private inquirySubmissions: Map<string, InquirySubmission>;
+  private blogPosts: Map<string, BlogPost>;
 
   constructor() {
     this.servicePreviews = new Map();
     this.contactSubmissions = new Map();
     this.inquirySubmissions = new Map();
+    this.blogPosts = new Map();
     
     // Initialize with sample data
     this.initializeSampleData();
@@ -155,6 +166,127 @@ export class MemStorage implements IStorage {
       };
       this.servicePreviews.set(id, servicePreview);
     });
+
+    // Initialize sample blog posts
+    const blogPostsData: InsertBlogPost[] = [
+      {
+        title: "The Future of Web Development: Trends to Watch in 2024",
+        slug: "future-web-development-trends-2024",
+        excerpt: "Discover the latest trends shaping the web development landscape and how they'll impact your next project.",
+        content: `# The Future of Web Development: Trends to Watch in 2024
+
+As we move forward in the digital age, web development continues to evolve at an unprecedented pace. At LOVGOL, we stay at the forefront of these changes to deliver cutting-edge solutions to our clients.
+
+## 1. AI-Powered Development
+
+Artificial Intelligence is revolutionizing how we build websites and applications. From automated code generation to intelligent testing, AI tools are making development faster and more efficient.
+
+## 2. Progressive Web Apps (PWAs)
+
+PWAs continue to bridge the gap between web and mobile applications, offering native-like experiences with web technologies.
+
+## 3. Serverless Architecture
+
+The shift towards serverless computing is enabling more scalable and cost-effective solutions.
+
+## Conclusion
+
+These trends represent exciting opportunities for businesses to enhance their digital presence. At LOVGOL, we're ready to help you navigate these changes.`,
+        featuredImage: "https://images.unsplash.com/photo-1555949963-aa79dcee981c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=400",
+        category: "Technology",
+        tags: ["Web Development", "AI", "PWA", "Serverless"],
+        isPublished: true,
+        publishedAt: new Date("2024-01-15"),
+      },
+      {
+        title: "Mobile App Development: Native vs Cross-Platform in 2024",
+        slug: "mobile-app-native-vs-cross-platform-2024",
+        excerpt: "Compare the advantages of native and cross-platform development approaches for your mobile app project.",
+        content: `# Mobile App Development: Native vs Cross-Platform in 2024
+
+Choosing the right development approach for your mobile app is crucial for success. Let's explore the pros and cons of each approach.
+
+## Native Development
+
+Native apps offer the best performance and platform-specific features but require separate codebases.
+
+### Advantages:
+- Superior performance
+- Full access to device features
+- Platform-specific UI/UX
+
+## Cross-Platform Development
+
+Tools like React Native and Flutter allow code sharing across platforms.
+
+### Advantages:
+- Faster development
+- Cost-effective
+- Single codebase
+
+## Our Recommendation
+
+At LOVGOL, we help you choose the right approach based on your specific needs, budget, and timeline.`,
+        featuredImage: "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=400",
+        category: "Mobile Development",
+        tags: ["Mobile Apps", "React Native", "Flutter", "iOS", "Android"],
+        isPublished: true,
+        publishedAt: new Date("2024-01-10"),
+      },
+      {
+        title: "Automation Success Story: How We Saved DataCorp 500K Annually",
+        slug: "automation-success-story-datacorp",
+        excerpt: "Learn how our automation solutions transformed DataCorp's operations and delivered massive cost savings.",
+        content: `# Automation Success Story: How We Saved DataCorp 500K Annually
+
+At LOVGOL, we believe in the power of automation to transform businesses. Here's how we helped DataCorp revolutionize their operations.
+
+## The Challenge
+
+DataCorp was processing millions of records manually, leading to:
+- High operational costs
+- Human errors
+- Slow processing times
+
+## Our Solution
+
+We implemented a comprehensive automation pipeline using:
+- Python for data processing
+- Apache Kafka for real-time streaming
+- Docker for containerization
+- Kubernetes for orchestration
+
+## Results
+
+- 95% reduction in processing time
+- 99.9% accuracy improvement
+- $500K annual cost savings
+- Zero manual intervention required
+
+## Conclusion
+
+This project showcases the transformative power of intelligent automation when applied strategically.`,
+        featuredImage: "https://images.unsplash.com/photo-1518186285589-2f7649de83e0?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=400",
+        category: "Case Studies",
+        tags: ["Automation", "Python", "Case Study", "ROI"],
+        isPublished: true,
+        publishedAt: new Date("2024-01-05"),
+      }
+    ];
+
+    blogPostsData.forEach(postData => {
+      const id = randomUUID();
+      const blogPost: BlogPost = {
+        ...postData,
+        id,
+        tags: postData.tags as string[],
+        featuredImage: postData.featuredImage || null,
+        publishedAt: postData.publishedAt || null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      this.blogPosts.set(id, blogPost);
+    });
   }
 
   async getServicePreviews(): Promise<ServicePreview[]> {
@@ -242,6 +374,66 @@ export class MemStorage implements IStorage {
 
   async getInquirySubmissions(): Promise<InquirySubmission[]> {
     return Array.from(this.inquirySubmissions.values());
+  }
+
+  async getBlogPosts(): Promise<BlogPost[]> {
+    return Array.from(this.blogPosts.values())
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }
+
+  async getPublishedBlogPosts(): Promise<BlogPost[]> {
+    return Array.from(this.blogPosts.values())
+      .filter(post => post.isPublished)
+      .sort((a, b) => {
+        const aDate = a.publishedAt || a.createdAt;
+        const bDate = b.publishedAt || b.createdAt;
+        return new Date(bDate).getTime() - new Date(aDate).getTime();
+      });
+  }
+
+  async getBlogPost(id: string): Promise<BlogPost | undefined> {
+    return this.blogPosts.get(id);
+  }
+
+  async getBlogPostBySlug(slug: string): Promise<BlogPost | undefined> {
+    return Array.from(this.blogPosts.values()).find(post => post.slug === slug);
+  }
+
+  async createBlogPost(insertPost: InsertBlogPost): Promise<BlogPost> {
+    const id = randomUUID();
+    const blogPost: BlogPost = {
+      ...insertPost,
+      id,
+      tags: insertPost.tags as string[],
+      featuredImage: insertPost.featuredImage || null,
+      publishedAt: insertPost.publishedAt || null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    this.blogPosts.set(id, blogPost);
+    return blogPost;
+  }
+
+  async updateBlogPost(id: string, updatePost: Partial<InsertBlogPost>): Promise<BlogPost> {
+    const existing = this.blogPosts.get(id);
+    if (!existing) {
+      throw new Error("Blog post not found");
+    }
+    
+    const updated: BlogPost = {
+      ...existing,
+      ...updatePost,
+      tags: updatePost.tags !== undefined ? (updatePost.tags as string[]) : existing.tags,
+      featuredImage: updatePost.featuredImage !== undefined ? (updatePost.featuredImage || null) : existing.featuredImage,
+      publishedAt: updatePost.publishedAt !== undefined ? updatePost.publishedAt : existing.publishedAt,
+      updatedAt: new Date(),
+    };
+    this.blogPosts.set(id, updated);
+    return updated;
+  }
+
+  async deleteBlogPost(id: string): Promise<boolean> {
+    return this.blogPosts.delete(id);
   }
 }
 
