@@ -4,6 +4,7 @@ import { ArrowLeft, ExternalLink, Clock, Users, Code } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import SEOHead from "@/components/SEOHead";
 
 interface CaseStudyData {
   id: string;
@@ -113,8 +114,40 @@ export default function CaseStudy() {
     );
   }
 
+  const caseStudyStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": caseStudy.title,
+    "description": caseStudy.challenge,
+    "image": caseStudy.heroImage,
+    "author": {
+      "@type": "Organization",
+      "name": "LOVGOL"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "LOVGOL"
+    },
+    "about": {
+      "@type": "SoftwareApplication",
+      "name": caseStudy.title,
+      "applicationCategory": caseStudy.industry,
+      "operatingSystem": "Web"
+    },
+    "keywords": caseStudy.technologies.join(", ")
+  };
+
   return (
     <div className="min-h-screen bg-background" data-testid="case-study-page">
+      <SEOHead
+        title={`${caseStudy.title} - Case Study | LOVGOL`}
+        description={`Learn how LOVGOL helped ${caseStudy.client} with ${caseStudy.title}. ${caseStudy.challenge.substring(0, 120)}...`}
+        keywords={`case study, ${caseStudy.industry}, ${caseStudy.technologies.join(", ")}, ${caseStudy.client}`}
+        image={caseStudy.heroImage}
+        url={`https://lovgol.com/case-study/${caseStudy.id}`}
+        type="article"
+        structuredData={caseStudyStructuredData}
+      />
       {/* Back Button */}
       <div className="fixed top-6 left-6 z-50">
         <Button

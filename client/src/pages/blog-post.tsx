@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { ArrowLeft, Calendar, Clock, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import SEOHead from "@/components/SEOHead";
 import type { BlogPost } from "@shared/schema";
 
 export default function BlogPostPage() {
@@ -81,8 +82,39 @@ export default function BlogPostPage() {
 
   const blogPost = post as BlogPost;
 
+  const articleStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": blogPost.title,
+    "description": blogPost.excerpt,
+    "image": blogPost.featuredImage,
+    "datePublished": blogPost.publishedAt || blogPost.createdAt,
+    "dateModified": blogPost.updatedAt,
+    "author": {
+      "@type": "Organization",
+      "name": "LOVGOL"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "LOVGOL"
+    },
+    "articleSection": blogPost.category,
+    "keywords": blogPost.tags?.join(", ")
+  };
+
   return (
     <div className="min-h-screen bg-background" data-testid="blog-post-page">
+      <SEOHead
+        title={`${blogPost.title} | LOVGOL Blog`}
+        description={blogPost.excerpt}
+        keywords={blogPost.tags?.join(", ")}
+        image={blogPost.featuredImage || undefined}
+        url={`https://lovgol.com/blog/${blogPost.slug}`}
+        type="article"
+        publishedTime={blogPost.publishedAt || blogPost.createdAt}
+        author="LOVGOL"
+        structuredData={articleStructuredData}
+      />
       {/* Back Button */}
       <div className="fixed top-6 left-6 z-50">
         <Button

@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Calendar, Clock, ArrowRight } from "lucide-react";
+import SEOHead from "@/components/SEOHead";
 import type { BlogPost } from "@shared/schema";
 
 export default function Blog() {
@@ -43,8 +44,28 @@ export default function Blog() {
     );
   }
 
+  const blogStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "Blog",
+    "name": "LOVGOL Blog",
+    "description": "Latest insights and updates from LOVGOL on web development, mobile apps, and automation",
+    "url": "https://lovgol.com/blog",
+    "publisher": {
+      "@type": "Organization",
+      "name": "LOVGOL"
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background" data-testid="blog-page">
+      <SEOHead
+        title="Blog - Latest Insights & Updates | LOVGOL"
+        description="Stay updated with the latest trends, insights, and stories from LOVGOL about web development, mobile app development, and automation technologies."
+        keywords="technology blog, web development insights, mobile app trends, automation news, MERN stack tutorials, React Native guides, Flutter development"
+        url="https://lovgol.com/blog"
+        type="website"
+        structuredData={blogStructuredData}
+      />
       {/* Hero Section */}
       <section className="py-20 bg-gradient-bg relative overflow-hidden">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
