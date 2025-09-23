@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
+import ImageSequenceScroll from "./ImageSequenceScroll";
 import type { ServicePreview } from "@shared/schema";
 
 interface ServicesProps {
@@ -125,6 +126,30 @@ export default function Services({ onServiceClick }: ServicesProps) {
           )}
         </div>
 
+        {/* Image Sequence Demo Section */}
+        <div className="mb-20">
+          <div className="text-center mb-12">
+            <h3 className="text-4xl font-bold mb-4 masked-text">See Our Work in Action</h3>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              Scroll down to see our development process unfold step by step
+            </p>
+          </div>
+          
+          <div style={{ height: "200vh" }} className="relative">
+            <ImageSequenceScroll
+              images={[
+                "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=600&fit=crop",
+                "https://images.unsplash.com/photo-1551650975-87deedd944c3?w=800&h=600&fit=crop", 
+                "https://images.unsplash.com/photo-1557804506-669a67965ba0?w=800&h=600&fit=crop",
+                "https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=800&h=600&fit=crop",
+                "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=600&fit=crop"
+              ]}
+              className="w-full max-w-4xl mx-auto"
+              triggerHeight={600}
+            />
+          </div>
+        </div>
+
         {/* Service Cards */}
         {filteredServices.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground" data-testid="no-services">
@@ -145,7 +170,7 @@ export default function Services({ onServiceClick }: ServicesProps) {
                 exit={{ opacity: 0, scale: 0.9 }}
                 whileHover={{ y: -10, scale: 1.02 }}
                 transition={{ duration: 0.3 }}
-                className="service-card glass-card rounded-xl overflow-hidden cursor-pointer"
+                className="service-card glass-card rounded-xl overflow-hidden cursor-pointer relative group"
                 onClick={() => onServiceClick(service)}
                 data-testid={`service-card-${service.id}`}
               >
@@ -176,6 +201,25 @@ export default function Services({ onServiceClick }: ServicesProps) {
                   <p className="text-muted-foreground text-sm" data-testid={`service-description-${service.id}`}>
                     {service.description}
                   </p>
+                  
+                  {/* Case Study Link Overlay */}
+                  {(service.technology === "mern" || service.technology === "react-native" || service.technology === "python") && (
+                    <div className="absolute inset-0 bg-black/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const caseStudyId = service.technology === "mern" ? "ecommerce-platform" :
+                                            service.technology === "react-native" ? "mobile-fitness-app" : 
+                                            "automation-pipeline";
+                          window.location.href = `/case-study/${caseStudyId}`;
+                        }}
+                        className="bg-primary hover:bg-primary/80 text-primary-foreground px-4 py-2 rounded-lg font-medium transition-colors"
+                        data-testid={`case-study-link-${service.id}`}
+                      >
+                        View Case Study
+                      </button>
+                    </div>
+                  )}
                 </div>
               </motion.div>
             ))}

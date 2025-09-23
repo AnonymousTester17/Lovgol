@@ -13,6 +13,7 @@ import { Mail, Phone, MapPin, Send, MessageCircle, Twitter, Linkedin, Github, In
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { openWhatsApp } from "@/lib/whatsapp";
+import { useEmailJS } from "@/hooks/useEmailJS";
 import { motion } from "framer-motion";
 
 const contactFormSchema = z.object({
@@ -28,6 +29,7 @@ type ContactFormData = z.infer<typeof contactFormSchema>;
 export default function Contact() {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { sendEmail } = useEmailJS();
 
   const form = useForm<ContactFormData>({
     resolver: zodResolver(contactFormSchema),
@@ -42,7 +44,17 @@ export default function Contact() {
 
   const contactMutation = useMutation({
     mutationFn: async (data: ContactFormData) => {
+      // Save to database
       await apiRequest("POST", "/api/contact-submissions", data);
+      
+      // Send email via EmailJS
+      await sendEmail({
+        from_name: data.name,
+        from_email: data.email,
+        message: data.message,
+        service: data.service,
+        budget: data.budget,
+      });
     },
     onSuccess: () => {
       toast({

@@ -1,27 +1,52 @@
 import { motion } from "framer-motion";
+import TestimonialsCarousel from "./TestimonialsCarousel";
 
 export default function Clients() {
   const testimonials = [
     {
       id: 1,
       name: "Sarah Johnson",
-      role: "CEO, TechCorp",
+      role: "CEO",
+      company: "TechCorp",
       image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100",
-      text: "LOVGOL transformed our digital presence completely. The team's expertise in modern web technologies delivered beyond our expectations."
+      text: "LOVGOL transformed our digital presence completely. The team's expertise in modern web technologies delivered beyond our expectations.",
+      rating: 5
     },
     {
       id: 2,
       name: "Emily Chen",
-      role: "Product Manager, StartupX",
-      image: "https://pixabay.com/get/gea03746256c13a6e01e091efc2bb4444832639429393ab5eab373b062b228bcf42386525dd8cb7e2019f30cab5a45bdfd50fc4372edf93ca0f975bfdf2847cd8_1280.jpg",
-      text: "Outstanding mobile app development. Our users love the smooth performance and intuitive design they created for us."
+      role: "Product Manager",
+      company: "StartupX", 
+      image: "https://images.unsplash.com/photo-1494790108755-2616b332c8c2?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100",
+      text: "Outstanding mobile app development. Our users love the smooth performance and intuitive design they created for us.",
+      rating: 5
     },
     {
       id: 3,
       name: "Michael Rodriguez",
-      role: "CTO, InnovateLab",
+      role: "CTO",
+      company: "InnovateLab",
       image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100",
-      text: "The automation solutions they built saved us countless hours. Professional, reliable, and innovative approach to problem-solving."
+      text: "The automation solutions they built saved us countless hours. Professional, reliable, and innovative approach to problem-solving.",
+      rating: 5
+    },
+    {
+      id: 4,
+      name: "Lisa Wang",
+      role: "Founder",
+      company: "DigitalFlow",
+      image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100",
+      text: "From concept to launch, LOVGOL exceeded every expectation. Their attention to detail and user experience is unmatched.",
+      rating: 5
+    },
+    {
+      id: 5,
+      name: "David Kim",
+      role: "VP Engineering",
+      company: "CloudTech",
+      image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100",
+      text: "Working with LOVGOL was seamless. They delivered a robust, scalable solution that perfectly aligned with our technical requirements.",
+      rating: 5
     }
   ];
 
@@ -39,45 +64,13 @@ export default function Clients() {
           </p>
         </div>
 
-        {/* Testimonials */}
-        <div className="stacked-cards relative max-w-4xl mx-auto mb-16">
-          {testimonials.map((testimonial, index) => (
-            <motion.div
-              key={testimonial.id}
-              initial={{ opacity: 0, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: index * 0.2 }}
-              viewport={{ once: true }}
-              className="glass-card p-8 rounded-xl mb-8 transform transition-all duration-500"
-              style={{
-                transform: `translateY(${index * 10}px) scale(${1 - index * 0.02})`,
-                zIndex: testimonials.length - index,
-              }}
-              data-testid={`testimonial-${testimonial.id}`}
-            >
-              <div className="flex items-start space-x-4">
-                <img
-                  src={testimonial.image}
-                  alt={`${testimonial.name} testimonial`}
-                  className="w-16 h-16 rounded-full object-cover"
-                  data-testid={`testimonial-image-${testimonial.id}`}
-                />
-                <div>
-                  <p className="text-lg mb-4 italic" data-testid={`testimonial-text-${testimonial.id}`}>
-                    "{testimonial.text}"
-                  </p>
-                  <div>
-                    <div className="font-semibold" data-testid={`testimonial-name-${testimonial.id}`}>
-                      {testimonial.name}
-                    </div>
-                    <div className="text-muted-foreground" data-testid={`testimonial-role-${testimonial.id}`}>
-                      {testimonial.role}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          ))}
+        {/* Testimonials Carousel */}
+        <div className="mb-16">
+          <TestimonialsCarousel 
+            testimonials={testimonials}
+            autoPlay={true}
+            interval={6000}
+          />
         </div>
 
         {/* Client Logos */}

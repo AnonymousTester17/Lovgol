@@ -12,6 +12,7 @@ import { X, Send, MessageCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { openWhatsApp } from "@/lib/whatsapp";
+import { useEmailJS } from "@/hooks/useEmailJS";
 
 const inquiryFormSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -31,6 +32,7 @@ interface InquiryModalProps {
 export default function InquiryModal({ isOpen, onClose, initialService }: InquiryModalProps) {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { sendEmail } = useEmailJS();
 
   const form = useForm<InquiryFormData>({
     resolver: zodResolver(inquiryFormSchema),
@@ -51,7 +53,16 @@ export default function InquiryModal({ isOpen, onClose, initialService }: Inquir
 
   const inquiryMutation = useMutation({
     mutationFn: async (data: InquiryFormData) => {
+      // Save to database
       await apiRequest("POST", "/api/inquiry-submissions", data);
+      
+      // Send email via EmailJS
+      await sendEmail({
+        from_name: data.name,
+        from_email: data.email,
+        message: `Project Inquiry for ${data.service}\n\nDetails: ${data.details}`,
+        service: data.service,
+      });
     },
     onSuccess: () => {
       toast({
