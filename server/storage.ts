@@ -684,12 +684,19 @@ This project showcases the transformative power of intelligent automation when a
 
   async createBlogPost(insertPost: InsertBlogPost): Promise<BlogPost> {
     const id = randomUUID();
+    
+    // Handle publishedAt based on isPublished status
+    let publishedAt = null;
+    if (insertPost.isPublished) {
+      publishedAt = insertPost.publishedAt ? new Date(insertPost.publishedAt) : new Date();
+    }
+    
     const blogPost: BlogPost = {
       ...insertPost,
       id,
       tags: insertPost.tags as string[],
       featuredImage: insertPost.featuredImage || null,
-      publishedAt: insertPost.publishedAt || null,
+      publishedAt,
       createdAt: new Date(),
       updatedAt: new Date(),
       viewCount: "0",
@@ -705,12 +712,26 @@ This project showcases the transformative power of intelligent automation when a
       throw new Error("Blog post not found");
     }
 
+    // Handle publishedAt based on isPublished status
+    let publishedAt = existing.publishedAt;
+    if (updatePost.isPublished !== undefined) {
+      if (updatePost.isPublished && !existing.publishedAt) {
+        // Publishing for the first time
+        publishedAt = updatePost.publishedAt ? new Date(updatePost.publishedAt) : new Date();
+      } else if (!updatePost.isPublished) {
+        // Unpublishing
+        publishedAt = null;
+      }
+    } else if (updatePost.publishedAt !== undefined) {
+      publishedAt = updatePost.publishedAt ? new Date(updatePost.publishedAt) : null;
+    }
+
     const updated: BlogPost = {
       ...existing,
       ...updatePost,
       tags: updatePost.tags !== undefined ? (updatePost.tags as string[]) : existing.tags,
       featuredImage: updatePost.featuredImage !== undefined ? (updatePost.featuredImage || null) : existing.featuredImage,
-      publishedAt: updatePost.publishedAt !== undefined ? updatePost.publishedAt : existing.publishedAt,
+      publishedAt,
       updatedAt: new Date(),
     };
     this.blogPosts.set(id, updated);

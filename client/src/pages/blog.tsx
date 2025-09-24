@@ -11,7 +11,14 @@ export default function Blog() {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
 
   const { data: blogPosts = [], isLoading } = useQuery({
-    queryKey: ['/api/blog-posts', { published: true }],
+    queryKey: ['/api/blog-posts/published'],
+    queryFn: async () => {
+      const response = await fetch('/api/blog-posts?published=true');
+      if (!response.ok) {
+        throw new Error('Failed to fetch published blog posts');
+      }
+      return response.json();
+    },
   });
 
   const categories = ["all", "Technology", "Mobile Development", "Case Studies"];

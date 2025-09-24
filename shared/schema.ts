@@ -166,6 +166,8 @@ export const insertBlogPostSchema = createInsertSchema(blogPosts).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+  viewCount: true,
+  likeCount: true,
 });
 
 export const insertCaseStudySchema = createInsertSchema(caseStudies).omit({

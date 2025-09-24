@@ -136,8 +136,8 @@ export default function AdminBlogForm({ blogPost, onSuccess, onCancel }: AdminBl
     const formData = {
       ...data,
       tags: tags || [],
-      featuredImage: data.featuredImage || undefined,
-      publishedAt: data.isPublished ? new Date().toISOString() : undefined,
+      featuredImage: data.featuredImage || null,
+      publishedAt: data.isPublished ? new Date().toISOString() : null,
     };
 
     if (blogPost) {
