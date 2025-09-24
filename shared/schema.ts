@@ -49,6 +49,91 @@ export const blogPosts = pgTable("blog_posts", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+export const caseStudies = pgTable("case_studies", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: text("title").notNull(),
+  slug: text("slug").notNull().unique(),
+  client: text("client").notNull(),
+  industry: text("industry").notNull(),
+  timeline: text("timeline").notNull(),
+  teamSize: text("team_size").notNull(),
+  technologies: json("technologies").$type<string[]>().notNull().default(sql`'[]'::json`),
+  challenge: text("challenge").notNull(),
+  solution: text("solution").notNull(),
+  results: json("results").$type<string[]>().notNull().default(sql`'[]'::json`),
+  heroImage: text("hero_image").notNull(),
+  images: json("images").$type<string[]>().notNull().default(sql`'[]'::json`),
+  liveUrl: text("live_url"),
+  serviceId: varchar("service_id").references(() => servicesPreviews.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const projects = pgTable("projects", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: text("title").notNull(),
+  clientName: text("client_name").notNull(),
+  clientEmail: text("client_email").notNull(),
+  description: text("description").notNull(),
+  category: text("category").notNull(),
+  technology: text("technology").notNull(),
+  
+  // Progress tracking
+  progressPercentage: text("progress_percentage").notNull().default("0"),
+  progressDescription: text("progress_description").default(""),
+  estimatedDeliveryDays: text("estimated_delivery_days").notNull().default("30"),
+  deliveryStatus: text("delivery_status").notNull().default("pending"), // pending, completed
+  paymentStatus: text("payment_status").notNull().default("pending"), // pending, partial, completed
+  
+  // Project management
+  milestones: json("milestones").$type<Array<{
+    id: string;
+    title: string;
+    description: string;
+    status: "pending" | "in_progress" | "completed";
+    dueDate?: string;
+  }>>().notNull().default(sql`'[]'::json`),
+  
+  teamUpdates: json("team_updates").$type<Array<{
+    id: string;
+    date: string;
+    update: string;
+    author: string;
+  }>>().notNull().default(sql`'[]'::json`),
+  
+  clientFeedback: json("client_feedback").$type<Array<{
+    id: string;
+    date: string;
+    feedback: string;
+    type: "general" | "request" | "approval" | "concern";
+  }>>().notNull().default(sql`'[]'::json`),
+  
+  nextSteps: json("next_steps").$type<Array<{
+    id: string;
+    task: string;
+    priority: "low" | "medium" | "high";
+    assignee?: string;
+    dueDate?: string;
+  }>>().notNull().default(sql`'[]'::json`),
+  
+  riskIssues: json("risk_issues").$type<Array<{
+    id: string;
+    title: string;
+    description: string;
+    severity: "low" | "medium" | "high";
+    status: "open" | "resolved";
+    reportedDate: string;
+  }>>().notNull().default(sql`'[]'::json`),
+  
+  projectHealth: text("project_health").notNull().default("green"), // green, yellow, red
+  
+  // Client access
+  clientAccessToken: text("client_access_token").notNull().unique(),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 export const insertServicePreviewSchema = createInsertSchema(servicesPreviews).omit({
   id: true,
   createdAt: true,
@@ -71,6 +156,19 @@ export const insertBlogPostSchema = createInsertSchema(blogPosts).omit({
   updatedAt: true,
 });
 
+export const insertCaseStudySchema = createInsertSchema(caseStudies).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertProjectSchema = createInsertSchema(projects).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  clientAccessToken: true,
+});
+
 export type ServicePreview = typeof servicesPreviews.$inferSelect;
 export type InsertServicePreview = z.infer<typeof insertServicePreviewSchema>;
 export type ContactSubmission = typeof contactSubmissions.$inferSelect;
@@ -79,3 +177,7 @@ export type InquirySubmission = typeof inquirySubmissions.$inferSelect;
 export type InsertInquirySubmission = z.infer<typeof insertInquirySubmissionSchema>;
 export type BlogPost = typeof blogPosts.$inferSelect;
 export type InsertBlogPost = z.infer<typeof insertBlogPostSchema>;
+export type CaseStudy = typeof caseStudies.$inferSelect;
+export type InsertCaseStudy = z.infer<typeof insertCaseStudySchema>;
+export type Project = typeof projects.$inferSelect;
+export type InsertProject = z.infer<typeof insertProjectSchema>;

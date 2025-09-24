@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertServicePreviewSchema, insertContactSubmissionSchema, insertInquirySubmissionSchema, insertBlogPostSchema } from "@shared/schema";
+import { insertServicePreviewSchema, insertContactSubmissionSchema, insertInquirySubmissionSchema, insertBlogPostSchema, insertCaseStudySchema, insertProjectSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
@@ -212,6 +212,180 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ message: "Failed to delete blog post" });
+    }
+  });
+
+  // Case Studies Routes
+  app.get("/api/case-studies", async (req, res) => {
+    try {
+      const caseStudies = await storage.getCaseStudies();
+      res.json(caseStudies);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch case studies" });
+    }
+  });
+
+  app.get("/api/case-studies/:id", async (req, res) => {
+    try {
+      const caseStudy = await storage.getCaseStudy(req.params.id);
+      if (!caseStudy) {
+        return res.status(404).json({ message: "Case study not found" });
+      }
+      res.json(caseStudy);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch case study" });
+    }
+  });
+
+  app.get("/api/case-studies/slug/:slug", async (req, res) => {
+    try {
+      const caseStudy = await storage.getCaseStudyBySlug(req.params.slug);
+      if (!caseStudy) {
+        return res.status(404).json({ message: "Case study not found" });
+      }
+      res.json(caseStudy);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch case study" });
+    }
+  });
+
+  app.post("/api/case-studies", async (req, res) => {
+    try {
+      const validatedData = insertCaseStudySchema.parse(req.body);
+      const caseStudy = await storage.createCaseStudy(validatedData);
+      res.status(201).json(caseStudy);
+    } catch (error) {
+      if (error instanceof Error) {
+        res.status(400).json({ message: error.message });
+      } else {
+        res.status(500).json({ message: "Failed to create case study" });
+      }
+    }
+  });
+
+  app.put("/api/case-studies/:id", async (req, res) => {
+    try {
+      const validatedData = insertCaseStudySchema.partial().parse(req.body);
+      const caseStudy = await storage.updateCaseStudy(req.params.id, validatedData);
+      res.json(caseStudy);
+    } catch (error) {
+      if (error instanceof Error) {
+        if (error.message === "Case study not found") {
+          res.status(404).json({ message: error.message });
+        } else {
+          res.status(400).json({ message: error.message });
+        }
+      } else {
+        res.status(500).json({ message: "Failed to update case study" });
+      }
+    }
+  });
+
+  app.delete("/api/case-studies/:id", async (req, res) => {
+    try {
+      const deleted = await storage.deleteCaseStudy(req.params.id);
+      if (!deleted) {
+        return res.status(404).json({ message: "Case study not found" });
+      }
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete case study" });
+    }
+  });
+
+  // Projects Routes
+  app.get("/api/projects", async (req, res) => {
+    try {
+      const projects = await storage.getProjects();
+      res.json(projects);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch projects" });
+    }
+  });
+
+  app.get("/api/projects/:id", async (req, res) => {
+    try {
+      const project = await storage.getProject(req.params.id);
+      if (!project) {
+        return res.status(404).json({ message: "Project not found" });
+      }
+      res.json(project);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch project" });
+    }
+  });
+
+  app.get("/api/client-project/:token", async (req, res) => {
+    try {
+      const project = await storage.getProjectByToken(req.params.token);
+      if (!project) {
+        return res.status(404).json({ message: "Project not found" });
+      }
+      // Return project without sensitive admin data
+      const clientProject = {
+        id: project.id,
+        title: project.title,
+        description: project.description,
+        category: project.category,
+        technology: project.technology,
+        progressPercentage: project.progressPercentage,
+        progressDescription: project.progressDescription,
+        estimatedDeliveryDays: project.estimatedDeliveryDays,
+        deliveryStatus: project.deliveryStatus,
+        paymentStatus: project.paymentStatus,
+        milestones: project.milestones,
+        clientFeedback: project.clientFeedback,
+        projectHealth: project.projectHealth,
+        createdAt: project.createdAt,
+        updatedAt: project.updatedAt,
+      };
+      res.json(clientProject);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch project" });
+    }
+  });
+
+  app.post("/api/projects", async (req, res) => {
+    try {
+      const validatedData = insertProjectSchema.parse(req.body);
+      const project = await storage.createProject(validatedData);
+      res.status(201).json(project);
+    } catch (error) {
+      if (error instanceof Error) {
+        res.status(400).json({ message: error.message });
+      } else {
+        res.status(500).json({ message: "Failed to create project" });
+      }
+    }
+  });
+
+  app.put("/api/projects/:id", async (req, res) => {
+    try {
+      const validatedData = insertProjectSchema.partial().parse(req.body);
+      const project = await storage.updateProject(req.params.id, validatedData);
+      res.json(project);
+    } catch (error) {
+      if (error instanceof Error) {
+        if (error.message === "Project not found") {
+          res.status(404).json({ message: error.message });
+        } else {
+          res.status(400).json({ message: error.message });
+        }
+      } else {
+        res.status(500).json({ message: "Failed to update project" });
+      }
+    }
+  });
+
+  app.delete("/api/projects/:id", async (req, res) => {
+    try {
+      const deleted = await storage.deleteProject(req.params.id);
+      if (!deleted) {
+        return res.status(404).json({ message: "Project not found" });
+      }
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete project" });
     }
   });
 

@@ -5,101 +5,36 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import SEOHead from "@/components/SEOHead";
-
-interface CaseStudyData {
-  id: string;
-  title: string;
-  client: string;
-  industry: string;
-  timeline: string;
-  teamSize: string;
-  technologies: string[];
-  challenge: string;
-  solution: string;
-  results: string[];
-  heroImage: string;
-  images: string[];
-  liveUrl?: string;
-}
-
-const caseStudies: Record<string, CaseStudyData> = {
-  "ecommerce-platform": {
-    id: "ecommerce-platform",
-    title: "Next-Generation E-commerce Platform",
-    client: "TechCorp",
-    industry: "E-commerce",
-    timeline: "6 months",
-    teamSize: "5 developers",
-    technologies: ["React", "Node.js", "MongoDB", "Stripe", "AWS"],
-    challenge: "TechCorp needed a scalable e-commerce platform that could handle high traffic volumes while providing a seamless user experience across all devices. Their existing platform was outdated and couldn't support their growing business needs.",
-    solution: "We designed and built a modern, responsive e-commerce platform using React and Node.js, with a microservices architecture for scalability. The platform features real-time inventory management, secure payment processing, and advanced analytics.",
-    results: [
-      "300% increase in conversion rates",
-      "50% reduction in page load times", 
-      "99.9% uptime achievement",
-      "200% increase in mobile transactions"
-    ],
-    heroImage: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=600",
-    images: [
-      "https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600",
-      "https://images.unsplash.com/photo-1563013544-824ae1b704d3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600",
-      "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600"
-    ],
-    liveUrl: "https://techcorp-demo.lovgol.com"
-  },
-  "mobile-fitness-app": {
-    id: "mobile-fitness-app",
-    title: "AI-Powered Fitness Tracking App",
-    client: "FitLife",
-    industry: "Health & Fitness",
-    timeline: "8 months",
-    teamSize: "4 developers",
-    technologies: ["React Native", "Python", "TensorFlow", "Firebase"],
-    challenge: "FitLife wanted to create a comprehensive fitness app that could provide personalized workout recommendations using AI, track user progress, and integrate with various wearable devices.",
-    solution: "We developed a cross-platform mobile app using React Native with an AI recommendation engine built in Python. The app features real-time workout tracking, social features, and seamless integration with popular fitness wearables.",
-    results: [
-      "500K+ downloads in first 6 months",
-      "4.8 star rating on app stores",
-      "85% user retention rate",
-      "Featured as 'App of the Day'"
-    ],
-    heroImage: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=600",
-    images: [
-      "https://images.unsplash.com/photo-1551650975-87deedd944c3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600",
-      "https://images.unsplash.com/photo-1434596922112-19c563067271?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600"
-    ]
-  },
-  "automation-pipeline": {
-    id: "automation-pipeline", 
-    title: "Enterprise Data Processing Pipeline",
-    client: "DataCorp",
-    industry: "Data Analytics",
-    timeline: "4 months",
-    teamSize: "3 developers",
-    technologies: ["Python", "Apache Kafka", "Docker", "Kubernetes", "PostgreSQL"],
-    challenge: "DataCorp needed to automate their manual data processing workflows that were taking hours to complete and prone to human error. They required a scalable solution that could handle growing data volumes.",
-    solution: "We built a fully automated data pipeline using Python and Apache Kafka, containerized with Docker and orchestrated using Kubernetes. The system processes millions of records daily with built-in error handling and monitoring.",
-    results: [
-      "95% reduction in processing time",
-      "99.9% accuracy in data processing",
-      "Zero manual intervention required",
-      "$500K annual cost savings"
-    ],
-    heroImage: "https://images.unsplash.com/photo-1518186285589-2f7649de83e0?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=600",
-    images: [
-      "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600",
-      "https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600"
-    ]
-  }
-};
+import { useQuery } from "@tanstack/react-query";
+import type { CaseStudy } from "@shared/schema";
 
 export default function CaseStudy() {
-  const [, params] = useRoute("/case-study/:id");
-  const caseStudyId = params?.id;
+  const [, params] = useRoute("/case-study/:slug");
+  const caseStudySlug = params?.slug;
   
-  const caseStudy = caseStudyId ? caseStudies[caseStudyId] : null;
+  const { data: caseStudy, isLoading, error } = useQuery({
+    queryKey: ["/api/case-studies/slug", caseStudySlug],
+    queryFn: async () => {
+      if (!caseStudySlug) throw new Error("No case study slug provided");
+      const response = await fetch(`/api/case-studies/slug/${caseStudySlug}`);
+      if (!response.ok) throw new Error("Case study not found");
+      return response.json() as Promise<CaseStudy>;
+    },
+    enabled: !!caseStudySlug,
+  });
 
-  if (!caseStudy) {
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-4xl font-bold mb-4">Loading...</h1>
+          <p className="text-muted-foreground">Loading case study details...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !caseStudy) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
@@ -144,7 +79,7 @@ export default function CaseStudy() {
         description={`Learn how LOVGOL helped ${caseStudy.client} with ${caseStudy.title}. ${caseStudy.challenge.substring(0, 120)}...`}
         keywords={`case study, ${caseStudy.industry}, ${caseStudy.technologies.join(", ")}, ${caseStudy.client}`}
         image={caseStudy.heroImage}
-        url={`https://lovgol.com/case-study/${caseStudy.id}`}
+        url={`https://lovgol.com/case-study/${caseStudy.slug}`}
         type="article"
         structuredData={caseStudyStructuredData}
       />

@@ -9,15 +9,17 @@ import Admin from "@/pages/admin";
 import CaseStudy from "@/pages/case-study";
 import Blog from "@/pages/blog";
 import BlogPost from "@/pages/blog-post";
+import ClientProject from "@/pages/client-project";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/admin" component={Admin} />
-      <Route path="/case-study/:id" component={CaseStudy} />
+      <Route path="/case-study/:slug" component={CaseStudy} />
       <Route path="/blog" component={Blog} />
       <Route path="/blog/:slug" component={BlogPost} />
+      <Route path="/client-project/:token" component={ClientProject} />
       <Route component={NotFound} />
     </Switch>
   );

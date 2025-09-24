@@ -290,10 +290,10 @@ export default function Services({ onServiceClick }: ServicesProps) {
                       <motion.button
                         onClick={(e) => {
                           e.stopPropagation();
-                          const caseStudyId = service.technology === "mern" ? "ecommerce-platform" :
-                                            service.technology === "react-native" ? "mobile-fitness-app" : 
-                                            "automation-pipeline";
-                          window.location.href = `/case-study/${caseStudyId}`;
+                          const caseStudySlug = service.technology === "mern" ? "ecommerce-platform" :
+                                              service.technology === "react-native" ? "mobile-fitness-app" : 
+                                              "automation-pipeline";
+                          window.location.href = `/case-study/${caseStudySlug}`;
                         }}
                         className="bg-primary hover:bg-primary/80 text-primary-foreground px-6 py-3 rounded-lg font-medium transition-all duration-300 shadow-lg hover:shadow-xl"
                         data-testid={`case-study-link-${service.id}`}

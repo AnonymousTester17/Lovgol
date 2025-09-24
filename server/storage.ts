@@ -1,6 +1,67 @@
 import { type ServicePreview, type InsertServicePreview, type ContactSubmission, type InsertContactSubmission, type InquirySubmission, type InsertInquirySubmission, type BlogPost, type InsertBlogPost } from "@shared/schema";
 import { randomUUID } from "crypto";
 
+// Define Project and CaseStudy types (assuming they are defined in @shared/schema)
+// For demonstration purposes, let's define them here if they are not exported from @shared/schema
+interface Project {
+  id: string;
+  title: string;
+  description: string;
+  currentProgress: number;
+  progressDescription: string;
+  estimatedDeliveryDays: number;
+  deliveredState: "completed" | "pending";
+  paymentState: "pending" | "partial" | "completed";
+  milestones: { id: string; description: string; status: "completed" | "pending" }[];
+  teamUpdates: string[];
+  clientFeedback: string[];
+  nextSteps: string[];
+  riskTracker: { id: string; description: string; status: "resolved" | "open" }[];
+  overallHealth: "green" | "yellow" | "red";
+  clientLink: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface InsertProject {
+  title: string;
+  description: string;
+  currentProgress: number;
+  progressDescription: string;
+  estimatedDeliveryDays: number;
+  deliveredState?: "completed" | "pending";
+  paymentState?: "pending" | "partial" | "completed";
+  milestones?: { description: string; status: "completed" | "pending" }[];
+  teamUpdates?: string[];
+  clientFeedback?: string[];
+  nextSteps?: string[];
+  riskTracker?: { description: string; status: "resolved" | "open" }[];
+  overallHealth?: "green" | "yellow" | "red";
+}
+
+interface CaseStudy {
+  id: string;
+  title: string;
+  description: string;
+  imageUrl: string | null;
+  projectLink?: string;
+  clientName?: string;
+  slug: string;
+  tags: string[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface InsertCaseStudy {
+  title: string;
+  description: string;
+  imageUrl?: string | null;
+  projectLink?: string;
+  clientName?: string;
+  slug: string;
+  tags: string[];
+}
+
 export interface IStorage {
   // Service Previews
   getServicePreviews(): Promise<ServicePreview[]>;
@@ -10,11 +71,11 @@ export interface IStorage {
   createServicePreview(preview: InsertServicePreview): Promise<ServicePreview>;
   updateServicePreview(id: string, preview: Partial<InsertServicePreview>): Promise<ServicePreview>;
   deleteServicePreview(id: string): Promise<boolean>;
-  
+
   // Contact Submissions
   createContactSubmission(submission: InsertContactSubmission): Promise<ContactSubmission>;
   getContactSubmissions(): Promise<ContactSubmission[]>;
-  
+
   // Inquiry Submissions
   createInquirySubmission(submission: InsertInquirySubmission): Promise<InquirySubmission>;
   getInquirySubmissions(): Promise<InquirySubmission[]>;
@@ -27,6 +88,21 @@ export interface IStorage {
   createBlogPost(post: InsertBlogPost): Promise<BlogPost>;
   updateBlogPost(id: string, post: Partial<InsertBlogPost>): Promise<BlogPost>;
   deleteBlogPost(id: string): Promise<boolean>;
+
+  // Case Studies
+  createCaseStudy(caseStudy: InsertCaseStudy): Promise<CaseStudy>;
+  getCaseStudies(): Promise<CaseStudy[]>;
+  getCaseStudy(id: string): Promise<CaseStudy | undefined>;
+  getCaseStudyBySlug(slug: string): Promise<CaseStudy | undefined>;
+  updateCaseStudy(id: string, caseStudy: Partial<InsertCaseStudy>): Promise<CaseStudy>;
+  deleteCaseStudy(id: string): Promise<boolean>;
+
+  // Projects
+  createProject(project: InsertProject): Promise<Project>;
+  getProjects(): Promise<Project[]>;
+  getProject(id: string): Promise<Project | undefined>;
+  updateProject(id: string, project: Partial<InsertProject>): Promise<Project>;
+  deleteProject(id: string): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -34,13 +110,17 @@ export class MemStorage implements IStorage {
   private contactSubmissions: Map<string, ContactSubmission>;
   private inquirySubmissions: Map<string, InquirySubmission>;
   private blogPosts: Map<string, BlogPost>;
+  private caseStudies: Map<string, CaseStudy>;
+  private projects: Map<string, Project>;
 
   constructor() {
     this.servicePreviews = new Map();
     this.contactSubmissions = new Map();
     this.inquirySubmissions = new Map();
     this.blogPosts = new Map();
-    
+    this.caseStudies = new Map();
+    this.projects = new Map();
+
     // Initialize with sample data
     this.initializeSampleData();
   }
@@ -287,8 +367,108 @@ This project showcases the transformative power of intelligent automation when a
       };
       this.blogPosts.set(id, blogPost);
     });
+
+    // Initialize sample case studies
+    const caseStudiesData: InsertCaseStudy[] = [
+      {
+        title: "Revolutionizing E-commerce with MERN Stack",
+        description: "Developed a scalable e-commerce platform that increased sales by 30%.",
+        clientName: "ShopNow Inc.",
+        projectLink: "/projects/e-commerce-mern",
+        slug: "ecommerce-mern-stack",
+        tags: ["E-commerce", "MERN", "Scalability"],
+        imageUrl: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=250"
+      },
+      {
+        title: "Data-Driven Insights with React Dashboard",
+        description: "Built a real-time analytics dashboard for better business intelligence.",
+        clientName: "Data Insights Corp.",
+        projectLink: "/projects/analytics-dashboard",
+        slug: "analytics-dashboard-react",
+        tags: ["Analytics", "React", "Data Visualization"],
+        imageUrl: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=250"
+      }
+    ];
+
+    caseStudiesData.forEach(caseStudyData => {
+      const id = randomUUID();
+      const caseStudy: CaseStudy = {
+        ...caseStudyData,
+        id,
+        tags: caseStudyData.tags as string[],
+        imageUrl: caseStudyData.imageUrl || null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      this.caseStudies.set(id, caseStudy);
+    });
+
+    // Initialize sample projects
+    const projectsData: InsertProject[] = [
+      {
+        title: "Project Alpha",
+        description: "Developing a new mobile application for task management.",
+        currentProgress: 75,
+        progressDescription: "Completed UI design and core feature implementation. Started API integration.",
+        estimatedDeliveryDays: 15,
+        deliveredState: "pending",
+        paymentState: "partial",
+        milestones: [
+          { description: "UI Design Complete", status: "completed" },
+          { description: "Core Features Implemented", status: "completed" },
+          { description: "API Integration", status: "pending" },
+          { description: "Testing and QA", status: "pending" },
+        ],
+        teamUpdates: ["Day 10: API integration is proceeding smoothly."],
+        clientFeedback: ["Client is happy with the current progress and UI."],
+        nextSteps: ["Continue API integration", "Begin unit testing"],
+        riskTracker: [{ description: "Potential delay in third-party API availability", status: "open" }],
+        overallHealth: "yellow",
+      },
+      {
+        title: "Project Beta",
+        description: "Enhancing an existing e-commerce platform.",
+        currentProgress: 90,
+        progressDescription: "Finalizing performance optimizations and security updates.",
+        estimatedDeliveryDays: 5,
+        deliveredState: "pending",
+        paymentState: "completed",
+        milestones: [
+          { description: "Feature Development", status: "completed" },
+          { description: "Performance Optimization", status: "completed" },
+          { description: "Security Audit", status: "pending" },
+        ],
+        teamUpdates: ["Day 20: Security audit scheduled for tomorrow."],
+        clientFeedback: ["Client requested minor adjustments to the checkout flow."],
+        nextSteps: ["Complete security audit", "Deploy to staging environment"],
+        riskTracker: [],
+        overallHealth: "green",
+      }
+    ];
+
+    projectsData.forEach(projectData => {
+      const id = randomUUID();
+      const clientLink = `http://localhost:3000/projects/${id}/status`; // Example client link
+      const project: Project = {
+        ...projectData,
+        id,
+        milestones: projectData.milestones || [],
+        teamUpdates: projectData.teamUpdates || [],
+        clientFeedback: projectData.clientFeedback || [],
+        nextSteps: projectData.nextSteps || [],
+        riskTracker: projectData.riskTracker || [],
+        deliveredState: projectData.deliveredState || "pending",
+        paymentState: projectData.paymentState || "pending",
+        overallHealth: projectData.overallHealth || "green",
+        clientLink: clientLink,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      this.projects.set(id, project);
+    });
   }
 
+  // Service Preview Methods
   async getServicePreviews(): Promise<ServicePreview[]> {
     return Array.from(this.servicePreviews.values());
   }
@@ -328,7 +508,7 @@ This project showcases the transformative power of intelligent automation when a
     if (!existing) {
       throw new Error("Service preview not found");
     }
-    
+
     const updated: ServicePreview = {
       ...existing,
       ...updatePreview,
@@ -344,6 +524,7 @@ This project showcases the transformative power of intelligent automation when a
     return this.servicePreviews.delete(id);
   }
 
+  // Contact Submission Methods
   async createContactSubmission(submission: InsertContactSubmission): Promise<ContactSubmission> {
     const id = randomUUID();
     const contactSubmission: ContactSubmission = {
@@ -361,6 +542,7 @@ This project showcases the transformative power of intelligent automation when a
     return Array.from(this.contactSubmissions.values());
   }
 
+  // Inquiry Submission Methods
   async createInquirySubmission(submission: InsertInquirySubmission): Promise<InquirySubmission> {
     const id = randomUUID();
     const inquirySubmission: InquirySubmission = {
@@ -376,6 +558,7 @@ This project showcases the transformative power of intelligent automation when a
     return Array.from(this.inquirySubmissions.values());
   }
 
+  // Blog Post Methods
   async getBlogPosts(): Promise<BlogPost[]> {
     return Array.from(this.blogPosts.values())
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
@@ -419,7 +602,7 @@ This project showcases the transformative power of intelligent automation when a
     if (!existing) {
       throw new Error("Blog post not found");
     }
-    
+
     const updated: BlogPost = {
       ...existing,
       ...updatePost,
@@ -434,6 +617,114 @@ This project showcases the transformative power of intelligent automation when a
 
   async deleteBlogPost(id: string): Promise<boolean> {
     return this.blogPosts.delete(id);
+  }
+
+  // Case Study Methods
+  async createCaseStudy(insertCaseStudy: InsertCaseStudy): Promise<CaseStudy> {
+    const id = randomUUID();
+    const caseStudy: CaseStudy = {
+      ...insertCaseStudy,
+      id,
+      tags: insertCaseStudy.tags as string[],
+      imageUrl: insertCaseStudy.imageUrl || null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    this.caseStudies.set(id, caseStudy);
+    return caseStudy;
+  }
+
+  async getCaseStudies(): Promise<CaseStudy[]> {
+    return Array.from(this.caseStudies.values())
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }
+
+  async getCaseStudy(id: string): Promise<CaseStudy | undefined> {
+    return this.caseStudies.get(id);
+  }
+
+  async getCaseStudyBySlug(slug: string): Promise<CaseStudy | undefined> {
+    return Array.from(this.caseStudies.values()).find(cs => cs.slug === slug);
+  }
+
+  async updateCaseStudy(id: string, updateCaseStudy: Partial<InsertCaseStudy>): Promise<CaseStudy> {
+    const existing = this.caseStudies.get(id);
+    if (!existing) {
+      throw new Error("Case study not found");
+    }
+
+    const updated: CaseStudy = {
+      ...existing,
+      ...updateCaseStudy,
+      tags: updateCaseStudy.tags !== undefined ? (updateCaseStudy.tags as string[]) : existing.tags,
+      imageUrl: updateCaseStudy.imageUrl !== undefined ? (updateCaseStudy.imageUrl || null) : existing.imageUrl,
+      updatedAt: new Date(),
+    };
+    this.caseStudies.set(id, updated);
+    return updated;
+  }
+
+  async deleteCaseStudy(id: string): Promise<boolean> {
+    return this.caseStudies.delete(id);
+  }
+
+  // Project Methods
+  async createProject(insertProject: InsertProject): Promise<Project> {
+    const id = randomUUID();
+    const clientLink = `http://localhost:3000/projects/${id}/status`; // Example client link
+    const project: Project = {
+      ...insertProject,
+      id,
+      milestones: insertProject.milestones || [],
+      teamUpdates: insertProject.teamUpdates || [],
+      clientFeedback: insertProject.clientFeedback || [],
+      nextSteps: insertProject.nextSteps || [],
+      riskTracker: insertProject.riskTracker || [],
+      deliveredState: insertProject.deliveredState || "pending",
+      paymentState: insertProject.paymentState || "pending",
+      overallHealth: insertProject.overallHealth || "green",
+      clientLink: clientLink,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    this.projects.set(id, project);
+    return project;
+  }
+
+  async getProjects(): Promise<Project[]> {
+    return Array.from(this.projects.values())
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }
+
+  async getProject(id: string): Promise<Project | undefined> {
+    return this.projects.get(id);
+  }
+
+  async updateProject(id: string, updateProject: Partial<InsertProject>): Promise<Project> {
+    const existing = this.projects.get(id);
+    if (!existing) {
+      throw new Error("Project not found");
+    }
+
+    const updated: Project = {
+      ...existing,
+      ...updateProject,
+      milestones: updateProject.milestones !== undefined ? updateProject.milestones : existing.milestones,
+      teamUpdates: updateProject.teamUpdates !== undefined ? updateProject.teamUpdates : existing.teamUpdates,
+      clientFeedback: updateProject.clientFeedback !== undefined ? updateProject.clientFeedback : existing.clientFeedback,
+      nextSteps: updateProject.nextSteps !== undefined ? updateProject.nextSteps : existing.nextSteps,
+      riskTracker: updateProject.riskTracker !== undefined ? updateProject.riskTracker : existing.riskTracker,
+      deliveredState: updateProject.deliveredState || existing.deliveredState,
+      paymentState: updateProject.paymentState || existing.paymentState,
+      overallHealth: updateProject.overallHealth || existing.overallHealth,
+      updatedAt: new Date(),
+    };
+    this.projects.set(id, updated);
+    return updated;
+  }
+
+  async deleteProject(id: string): Promise<boolean> {
+    return this.projects.delete(id);
   }
 }
 
