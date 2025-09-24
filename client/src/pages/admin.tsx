@@ -347,15 +347,15 @@ export default function Admin() {
                         data-testid={`img-case-study-${caseStudy.id}`}
                       />
                       <p className="text-sm text-muted-foreground mb-4" data-testid={`text-challenge-${caseStudy.id}`}>
-                        {caseStudy.challenge.substring(0, 120)}...
+                        {caseStudy.challenge ? caseStudy.challenge.substring(0, 120) + '...' : 'No challenge description available'}
                       </p>
                       <div className="flex flex-wrap gap-1">
-                        {caseStudy.technologies.slice(0, 3).map((tech, index) => (
+                        {caseStudy.technologies && caseStudy.technologies.slice(0, 3).map((tech, index) => (
                           <Badge key={index} variant="outline" className="text-xs" data-testid={`tech-${caseStudy.id}-${index}`}>
                             {tech}
                           </Badge>
                         ))}
-                        {caseStudy.technologies.length > 3 && (
+                        {caseStudy.technologies && caseStudy.technologies.length > 3 && (
                           <Badge variant="outline" className="text-xs">
                             +{caseStudy.technologies.length - 3} more
                           </Badge>
