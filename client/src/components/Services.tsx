@@ -152,60 +152,142 @@ export default function Services({ onServiceClick }: ServicesProps) {
 
         {/* Service Cards */}
         {filteredServices.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground" data-testid="no-services">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="text-center py-8 text-muted-foreground" 
+            data-testid="no-services"
+          >
             No services found for the selected filters.
-          </div>
+          </motion.div>
         ) : (
           <motion.div 
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
             layout
             data-testid="services-grid"
           >
-            {filteredServices.map((service: ServicePreview) => (
+            {filteredServices.map((service: ServicePreview, index) => (
               <motion.div
                 key={service.id}
                 layout
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                whileHover={{ y: -10, scale: 1.02 }}
-                transition={{ duration: 0.3 }}
-                className="service-card glass-card rounded-xl overflow-hidden cursor-pointer relative group"
+                initial={{ opacity: 0, y: 50, scale: 0.9 }}
+                animate={{ 
+                  opacity: 1, 
+                  y: 0, 
+                  scale: 1,
+                  transition: {
+                    duration: 0.6,
+                    delay: index * 0.1,
+                    ease: [0.25, 0.46, 0.45, 0.94]
+                  }
+                }}
+                exit={{ 
+                  opacity: 0, 
+                  y: -50, 
+                  scale: 0.8,
+                  transition: {
+                    duration: 0.4,
+                    ease: [0.25, 0.46, 0.45, 0.94]
+                  }
+                }}
+                whileHover={{ 
+                  y: -15, 
+                  scale: 1.05,
+                  rotateY: 5,
+                  transition: {
+                    duration: 0.3,
+                    ease: [0.25, 0.46, 0.45, 0.94]
+                  }
+                }}
+                whileTap={{ 
+                  scale: 0.98,
+                  transition: { duration: 0.1 }
+                }}
+                className="service-card glass-card rounded-xl overflow-hidden cursor-pointer relative group transform-gpu perspective-1000"
                 onClick={() => onServiceClick(service)}
                 data-testid={`service-card-${service.id}`}
+                style={{ transformStyle: "preserve-3d" }}
               >
                 {service.imageUrl && (
-                  <img
-                    src={service.imageUrl}
-                    alt={service.title}
-                    className="w-full h-48 object-cover"
-                    data-testid={`service-image-${service.id}`}
-                  />
-                )}
-                <div className="p-6">
-                  <div className="flex flex-wrap gap-2 mb-3">
-                    {service.tags.slice(0, 2).map((tag, index) => (
-                      <Badge
-                        key={index}
-                        variant="secondary"
-                        className="bg-primary/20 text-primary text-xs px-2 py-1 rounded"
-                        data-testid={`service-tag-${service.id}-${index}`}
-                      >
-                        {tag}
-                      </Badge>
-                    ))}
+                  <div className="relative overflow-hidden">
+                    <motion.img
+                      src={service.imageUrl}
+                      alt={service.title}
+                      className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-110"
+                      initial={{ scale: 1.1, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ duration: 0.6, delay: index * 0.1 + 0.2 }}
+                      data-testid={`service-image-${service.id}`}
+                    />
+                    <motion.div 
+                      className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100"
+                      transition={{ duration: 0.3 }}
+                    />
                   </div>
-                  <h3 className="text-lg font-semibold mb-2" data-testid={`service-title-${service.id}`}>
+                )}
+                <motion.div 
+                  className="p-6"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: index * 0.1 + 0.3 }}
+                >
+                  <motion.div 
+                    className="flex flex-wrap gap-2 mb-3"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, delay: index * 0.1 + 0.4 }}
+                  >
+                    {service.tags.slice(0, 2).map((tag, tagIndex) => (
+                      <motion.div
+                        key={tagIndex}
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ 
+                          duration: 0.3, 
+                          delay: index * 0.1 + 0.5 + tagIndex * 0.1,
+                          ease: "backOut"
+                        }}
+                        whileHover={{ scale: 1.1 }}
+                      >
+                        <Badge
+                          variant="secondary"
+                          className="bg-primary/20 text-primary text-xs px-2 py-1 rounded transition-all duration-200 hover:bg-primary/30"
+                          data-testid={`service-tag-${service.id}-${tagIndex}`}
+                        >
+                          {tag}
+                        </Badge>
+                      </motion.div>
+                    ))}
+                  </motion.div>
+                  <motion.h3 
+                    className="text-lg font-semibold mb-2 group-hover:text-primary transition-colors duration-300" 
+                    data-testid={`service-title-${service.id}`}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, delay: index * 0.1 + 0.5 }}
+                  >
                     {service.title}
-                  </h3>
-                  <p className="text-muted-foreground text-sm" data-testid={`service-description-${service.id}`}>
+                  </motion.h3>
+                  <motion.p 
+                    className="text-muted-foreground text-sm leading-relaxed" 
+                    data-testid={`service-description-${service.id}`}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, delay: index * 0.1 + 0.6 }}
+                  >
                     {service.description}
-                  </p>
+                  </motion.p>
                   
                   {/* Case Study Link Overlay */}
                   {(service.technology === "mern" || service.technology === "react-native" || service.technology === "python") && (
-                    <div className="absolute inset-0 bg-black/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                      <button
+                    <motion.div 
+                      className="absolute inset-0 bg-gradient-to-br from-black/90 via-black/80 to-black/70 opacity-0 group-hover:opacity-100 flex items-center justify-center backdrop-blur-sm"
+                      initial={{ opacity: 0 }}
+                      whileHover={{ opacity: 1 }}
+                      transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
+                    >
+                      <motion.button
                         onClick={(e) => {
                           e.stopPropagation();
                           const caseStudyId = service.technology === "mern" ? "ecommerce-platform" :
@@ -213,14 +295,22 @@ export default function Services({ onServiceClick }: ServicesProps) {
                                             "automation-pipeline";
                           window.location.href = `/case-study/${caseStudyId}`;
                         }}
-                        className="bg-primary hover:bg-primary/80 text-primary-foreground px-4 py-2 rounded-lg font-medium transition-colors"
+                        className="bg-primary hover:bg-primary/80 text-primary-foreground px-6 py-3 rounded-lg font-medium transition-all duration-300 shadow-lg hover:shadow-xl"
                         data-testid={`case-study-link-${service.id}`}
+                        initial={{ scale: 0.8, y: 20, opacity: 0 }}
+                        whileHover={{ 
+                          scale: 1.05, 
+                          y: 0, 
+                          opacity: 1,
+                          transition: { duration: 0.3, delay: 0.1 }
+                        }}
+                        whileTap={{ scale: 0.95 }}
                       >
                         View Case Study
-                      </button>
-                    </div>
+                      </motion.button>
+                    </motion.div>
                   )}
-                </div>
+                </motion.div>
               </motion.div>
             ))}
           </motion.div>

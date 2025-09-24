@@ -81,26 +81,56 @@ export default function ImageSequenceScroll({
             key={index}
             src={src}
             alt={`Sequence frame ${index + 1}`}
-            className="absolute inset-0 w-full h-full object-cover rounded-lg"
+            className="absolute inset-0 w-full h-full object-cover rounded-lg shadow-2xl"
             style={{ 
               opacity: index === currentFrame ? 1 : 0,
-              zIndex: index === currentFrame ? 1 : 0
+              zIndex: index === currentFrame ? 2 : 1
             }}
             animate={{ 
-              opacity: index === currentFrame ? 1 : 0 
+              opacity: index === currentFrame ? 1 : 0,
+              scale: index === currentFrame ? 1 : 0.98,
+              filter: index === currentFrame ? "blur(0px)" : "blur(2px)"
             }}
-            transition={{ duration: 0.1 }}
+            transition={{ 
+              duration: 0.4,
+              ease: [0.25, 0.46, 0.45, 0.94],
+              opacity: { duration: 0.3 },
+              scale: { duration: 0.5 },
+              filter: { duration: 0.3 }
+            }}
             data-testid={`sequence-frame-${index}`}
           />
         ))}
       </div>
       
       {/* Progress indicator */}
-      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black/50 px-3 py-1 rounded-full">
-        <span className="text-white text-sm" data-testid="frame-counter">
-          {currentFrame + 1} / {images.length}
-        </span>
-      </div>
+      <motion.div 
+        className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black/70 backdrop-blur-sm px-4 py-2 rounded-full border border-white/20"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.3 }}
+      >
+        <div className="flex items-center space-x-3">
+          <motion.span 
+            className="text-white text-sm font-medium" 
+            data-testid="frame-counter"
+            key={currentFrame}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            {currentFrame + 1} / {images.length}
+          </motion.span>
+          <div className="w-16 h-1 bg-white/30 rounded-full overflow-hidden">
+            <motion.div 
+              className="h-full bg-white rounded-full"
+              initial={{ width: 0 }}
+              animate={{ width: `${((currentFrame + 1) / images.length) * 100}%` }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+            />
+          </div>
+        </div>
+      </motion.div>
     </div>
   );
 }
