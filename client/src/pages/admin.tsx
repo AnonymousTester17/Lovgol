@@ -4,59 +4,66 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Trash2, Edit, Plus, ExternalLink, Eye, Copy } from "lucide-react";
+import { Trash2, Edit, Plus, ExternalLink, Eye, Copy, Pencil } from "lucide-react";
 import AdminServiceForm from "@/components/AdminServiceForm";
 import AdminCaseStudyForm from "@/components/AdminCaseStudyForm";
 import AdminProjectForm from "@/components/AdminProjectForm";
+import AdminBlogForm from "@/components/AdminBlogForm";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import type { ServicePreview, CaseStudy, Project } from "@shared/schema";
+import type { ServicePreview, CaseStudy, Project, BlogPost } from "@shared/schema";
 
 export default function Admin() {
   const [editingService, setEditingService] = useState<ServicePreview | null>(null);
   const [editingCaseStudy, setEditingCaseStudy] = useState<CaseStudy | null>(null);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const [selectedBlogPost, setSelectedBlogPost] = useState<BlogPost | null>(null);
   const [showServiceForm, setShowServiceForm] = useState(false);
   const [showCaseStudyForm, setShowCaseStudyForm] = useState(false);
   const [showProjectForm, setShowProjectForm] = useState(false);
+  const [showBlogForm, setShowBlogForm] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: servicePreviews = [], isLoading: servicesLoading } = useQuery({
+  const { data: servicePreviews = [], isLoading: servicesLoading } = useQuery<ServicePreview[]>({
     queryKey: ["/api/service-previews"],
   });
 
-  const { data: caseStudies = [], isLoading: caseStudiesLoading } = useQuery({
+  const { data: caseStudies = [], isLoading: caseStudiesLoading } = useQuery<CaseStudy[]>({
     queryKey: ["/api/case-studies"],
   });
 
-  const { data: projects = [], isLoading: projectsLoading } = useQuery({
+  const { data: projects = [], isLoading: projectsLoading } = useQuery<Project[]>({
     queryKey: ["/api/projects"],
   });
 
-  const { data: contactSubmissions = [], isLoading: contactsLoading } = useQuery({
+  const { data: contactSubmissions = [], isLoading: contactsLoading } = useQuery<any[]>({
     queryKey: ["/api/contact-submissions"],
   });
 
-  const { data: inquirySubmissions = [], isLoading: inquiriesLoading } = useQuery({
+  const { data: inquirySubmissions = [], isLoading: inquiriesLoading } = useQuery<any[]>({
     queryKey: ["/api/inquiry-submissions"],
+  });
+
+  const { data: blogPosts = [], isLoading: blogPostsLoading } = useQuery<BlogPost[]>({
+    queryKey: ['/api/blog-posts'],
   });
 
   const deleteServiceMutation = useMutation({
     mutationFn: async (id: string) => {
-      await apiRequest("DELETE", `/api/service-previews/${id}`);
+      return await apiRequest("DELETE", `/api/service-previews/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/service-previews"] });
       toast({
         title: "Service deleted",
-        description: "Service preview has been deleted successfully.",
+        description: "Service has been deleted successfully.",
       });
     },
     onError: () => {
       toast({
         title: "Error",
-        description: "Failed to delete service preview.",
+        description: "Failed to delete service.",
         variant: "destructive",
       });
     },
@@ -64,7 +71,7 @@ export default function Admin() {
 
   const deleteCaseStudyMutation = useMutation({
     mutationFn: async (id: string) => {
-      await apiRequest("DELETE", `/api/case-studies/${id}`);
+      return await apiRequest("DELETE", `/api/case-studies/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/case-studies"] });
@@ -84,7 +91,7 @@ export default function Admin() {
 
   const deleteProjectMutation = useMutation({
     mutationFn: async (id: string) => {
-      await apiRequest("DELETE", `/api/projects/${id}`);
+      return await apiRequest("DELETE", `/api/projects/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
@@ -97,6 +104,26 @@ export default function Admin() {
       toast({
         title: "Error",
         description: "Failed to delete project.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteBlogPostMutation = useMutation({
+    mutationFn: async (id: string) => {
+      return await apiRequest("DELETE", `/api/blog-posts/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/blog-posts"] });
+      toast({
+        title: "Blog post deleted",
+        description: "Blog post has been deleted successfully.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to delete blog post.",
         variant: "destructive",
       });
     },
@@ -182,6 +209,14 @@ export default function Admin() {
     });
   };
 
+  const deleteService = (id: string) => {
+    deleteServiceMutation.mutate(id);
+  };
+
+  const deleteBlogPost = (id: string) => {
+    deleteBlogPostMutation.mutate(id);
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground p-8" data-testid="admin-page">
       <div className="max-w-7xl mx-auto">
@@ -222,7 +257,7 @@ export default function Admin() {
             <TabsTrigger value="projects" data-testid="tab-projects">Projects ({projects.length})</TabsTrigger>
             <TabsTrigger value="contacts" data-testid="tab-contacts">Contact Submissions ({contactSubmissions.length})</TabsTrigger>
             <TabsTrigger value="inquiries" data-testid="tab-inquiries">Inquiries ({inquirySubmissions.length})</TabsTrigger>
-            <TabsTrigger value="blog" data-testid="tab-blog">Blog Posts</TabsTrigger>
+            <TabsTrigger value="blog" data-testid="tab-blog">Blog Posts ({blogPosts.length})</TabsTrigger>
           </TabsList>
 
           <TabsContent value="services" className="space-y-6">
@@ -541,40 +576,159 @@ export default function Admin() {
           </TabsContent>
 
           <TabsContent value="blog" className="space-y-6">
-            <div className="text-center py-8 text-muted-foreground">
-              Blog management coming soon! Blog posts are currently managed via API.
-              <br />
-              <span className="text-sm">
-                Use POST /api/blog-posts to create new posts programmatically.
-              </span>
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold">Blog Posts Management</h2>
+              <Button 
+                onClick={() => {
+                  setSelectedBlogPost(null);
+                  setShowBlogForm(true);
+                }}
+                className="bg-primary hover:bg-primary/80"
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Create Blog Post
+              </Button>
             </div>
+
+            {blogPostsLoading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[...Array(6)].map((_, i) => (
+                  <Card key={i} className="glass-card animate-pulse">
+                    <div className="h-48 bg-muted rounded-t-lg"></div>
+                    <CardContent className="p-4">
+                      <div className="h-4 bg-muted rounded mb-2"></div>
+                      <div className="h-3 bg-muted rounded mb-4"></div>
+                      <div className="flex justify-between">
+                        <div className="h-8 bg-muted rounded w-16"></div>
+                        <div className="h-8 bg-muted rounded w-16"></div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {blogPosts.map((post: BlogPost) => (
+                  <Card key={post.id} className="glass-card overflow-hidden">
+                    {post.featuredImage && (
+                      <img
+                        src={post.featuredImage}
+                        alt={post.title}
+                        className="w-full h-48 object-cover"
+                        data-testid={`img-blog-${post.id}`}
+                      />
+                    )}
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Badge variant={post.isPublished ? "default" : "secondary"}>
+                          {post.isPublished ? "Published" : "Draft"}
+                        </Badge>
+                        <Badge variant="outline">{post.category}</Badge>
+                      </div>
+                      <h3 className="font-semibold mb-2" data-testid={`title-blog-${post.id}`}>
+                        {post.title}
+                      </h3>
+                      <p className="text-sm text-muted-foreground mb-4" data-testid={`excerpt-blog-${post.id}`}>
+                        {post.excerpt.length > 100 ? post.excerpt.substring(0, 100) + '...' : post.excerpt}
+                      </p>
+                      <div className="flex justify-between text-sm text-muted-foreground mb-4">
+                        <span>Views: {post.viewCount || 0}</span>
+                        <span>Likes: {post.likeCount || 0}</span>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedBlogPost(post);
+                            setShowBlogForm(true);
+                          }}
+                          data-testid={`edit-blog-${post.id}`}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => deleteBlogPost(post.id)}
+                          data-testid={`delete-blog-${post.id}`}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => window.open(`/blog/${post.slug}`, '_blank')}
+                          data-testid={`view-blog-${post.id}`}
+                        >
+                          <ExternalLink className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
           </TabsContent>
         </Tabs>
-
-        {showServiceForm && (
-          <AdminServiceForm
-            service={editingService}
-            onSuccess={handleServiceFormSuccess}
-            onCancel={() => setShowServiceForm(false)}
-          />
-        )}
-
-        {showCaseStudyForm && (
-          <AdminCaseStudyForm
-            caseStudy={editingCaseStudy}
-            onSuccess={handleCaseStudyFormSuccess}
-            onCancel={() => setShowCaseStudyForm(false)}
-          />
-        )}
-
-        {showProjectForm && (
-          <AdminProjectForm
-            project={editingProject}
-            onSuccess={handleProjectFormSuccess}
-            onCancel={() => setShowProjectForm(false)}
-          />
-        )}
       </div>
+
+      {/* Forms */}
+      {showServiceForm && (
+        <AdminServiceForm
+          service={editingService}
+          onSuccess={() => {
+            setShowServiceForm(false);
+            setEditingService(null);
+          }}
+          onCancel={() => {
+            setShowServiceForm(false);
+            setEditingService(null);
+          }}
+        />
+      )}
+
+      {showCaseStudyForm && (
+        <AdminCaseStudyForm
+          caseStudy={editingCaseStudy}
+          onSuccess={() => {
+            setShowCaseStudyForm(false);
+            setEditingCaseStudy(null);
+          }}
+          onCancel={() => {
+            setShowCaseStudyForm(false);
+            setEditingCaseStudy(null);
+          }}
+        />
+      )}
+
+      {showProjectForm && (
+        <AdminProjectForm
+          project={editingProject}
+          onSuccess={() => {
+            setShowProjectForm(false);
+            setEditingProject(null);
+          }}
+          onCancel={() => {
+            setShowProjectForm(false);
+            setEditingProject(null);
+          }}
+        />
+      )}
+
+      {showBlogForm && (
+        <AdminBlogForm
+          blogPost={selectedBlogPost}
+          onSuccess={() => {
+            setShowBlogForm(false);
+            setSelectedBlogPost(null);
+          }}
+          onCancel={() => {
+            setShowBlogForm(false);
+            setSelectedBlogPost(null);
+          }}
+        />
+      )}
     </div>
   );
 }

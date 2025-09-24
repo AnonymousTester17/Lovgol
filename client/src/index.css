@@ -192,6 +192,114 @@ body {
   color: var(--primary-foreground);
 }
 
+/* Blog specific animations */
+@keyframes pulseGlow {
+  0%, 100% { 
+    box-shadow: 0 0 5px rgba(59, 130, 246, 0.3);
+  }
+  50% { 
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.6), 0 0 30px rgba(59, 130, 246, 0.4);
+  }
+}
+
+@keyframes bounce-gentle {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-3px); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200px 0; }
+  100% { background-position: 200px 0; }
+}
+
+.blog-card-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.blog-card-hover:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+.blog-card-hover:hover .blog-card-image {
+  transform: scale(1.1);
+}
+
+.blog-card-image {
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.reaction-button {
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.reaction-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: left 0.5s;
+}
+
+.reaction-button:hover::before {
+  left: 100%;
+}
+
+.reaction-button:hover {
+  transform: translateY(-2px);
+  animation: pulseGlow 2s infinite;
+}
+
+.category-tab {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.category-tab::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background: var(--primary);
+  transition: all 0.3s ease;
+  transform: translateX(-50%);
+}
+
+.category-tab:hover::before,
+.category-tab.active::before {
+  width: 100%;
+}
+
+.category-tab.active {
+  background: rgba(var(--primary-rgb), 0.1);
+  color: var(--primary);
+}
+
+.loading-shimmer {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200px 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.bounce-gentle {
+  animation: bounce-gentle 2s infinite;
+}
+
 @media (max-width: 768px) {
   .hero-text {
     font-size: 3rem;
@@ -199,5 +307,8 @@ body {
   .horizontal-scroll {
     flex-direction: column;
     overflow-x: visible;
+  }
+  .blog-card-hover:hover {
+    transform: translateY(-4px) scale(1.01);
   }
 }

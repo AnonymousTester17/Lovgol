@@ -100,10 +100,8 @@ export default function Blog() {
                 <button
                   key={category}
                   onClick={() => setSelectedCategory(category)}
-                  className={`px-6 py-2 rounded-full text-sm font-medium transition-colors ${
-                    selectedCategory === category
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted hover:bg-muted/80 text-muted-foreground"
+                  className={`px-6 py-2 rounded-full text-sm font-medium category-tab ${
+                    selectedCategory === category ? "active" : ""
                   }`}
                   data-testid={`category-filter-${category.toLowerCase().replace(" ", "-")}`}
                 >
@@ -134,13 +132,13 @@ export default function Blog() {
                   transition={{ duration: 0.6, delay: index * 0.1 }}
                   data-testid={`blog-post-${post.id}`}
                 >
-                  <Card className="glass-card h-full overflow-hidden group cursor-pointer hover:shadow-lg transition-all duration-300">
+                  <Card className="glass-card h-full overflow-hidden group cursor-pointer blog-card-hover">
                     {post.featuredImage && (
                       <div className="relative h-48 overflow-hidden">
                         <img
                           src={post.featuredImage}
                           alt={post.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          className="w-full h-full object-cover blog-card-image"
                           data-testid={`blog-post-image-${post.id}`}
                         />
                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
@@ -176,6 +174,11 @@ export default function Blog() {
                             {getReadingTime(post.content)}
                           </span>
                         </div>
+                      </div>
+
+                      <div className="flex items-center gap-4 text-xs text-muted-foreground mb-4">
+                        <span>👀 {post.viewCount || 0} views</span>
+                        <span>❤️ {post.likeCount || 0} likes</span>
                       </div>
                       
                       <button 

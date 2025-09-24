@@ -1,4 +1,4 @@
-import { type ServicePreview, type InsertServicePreview, type ContactSubmission, type InsertContactSubmission, type InquirySubmission, type InsertInquirySubmission, type BlogPost, type InsertBlogPost } from "@shared/schema";
+import { type ServicePreview, type InsertServicePreview, type ContactSubmission, type InsertContactSubmission, type InquirySubmission, type InsertInquirySubmission, type BlogPost, type InsertBlogPost, type CaseStudy, type InsertCaseStudy, type Project, type InsertProject, type BlogReaction, type InsertBlogReaction } from "@shared/schema";
 import { randomUUID } from "crypto";
 
 // Define Project and CaseStudy types (assuming they are defined in @shared/schema)
@@ -149,6 +149,7 @@ export interface IStorage {
   createBlogPost(post: InsertBlogPost): Promise<BlogPost>;
   updateBlogPost(id: string, post: Partial<InsertBlogPost>): Promise<BlogPost>;
   deleteBlogPost(id: string): Promise<boolean>;
+  incrementBlogPostView(id: string): Promise<BlogPost>;
 
   // Case Studies
   createCaseStudy(caseStudy: InsertCaseStudy): Promise<CaseStudy>;
@@ -165,6 +166,11 @@ export interface IStorage {
   getProjectByToken(token: string): Promise<Project | undefined>;
   updateProject(id: string, project: Partial<InsertProject>): Promise<Project>;
   deleteProject(id: string): Promise<boolean>;
+
+  // Blog Reactions
+  getBlogReactions(): Promise<BlogReaction[]>;
+  getBlogReactionsByPostId(postId: string): Promise<BlogReaction[]>;
+  createBlogReaction(reaction: InsertBlogReaction): Promise<BlogReaction>;
 }
 
 export class MemStorage implements IStorage {
@@ -173,7 +179,8 @@ export class MemStorage implements IStorage {
   private inquirySubmissions: Map<string, InquirySubmission>;
   private blogPosts: Map<string, BlogPost>;
   private caseStudies: Map<string, CaseStudy>;
-  private projects: Map<string, Project>;
+  private projects: Map<string, Project> = new Map();
+  private blogReactions: Map<string, BlogReaction> = new Map();
 
   constructor() {
     this.servicePreviews = new Map();
@@ -181,7 +188,6 @@ export class MemStorage implements IStorage {
     this.inquirySubmissions = new Map();
     this.blogPosts = new Map();
     this.caseStudies = new Map();
-    this.projects = new Map();
 
     // Initialize with sample data
     this.initializeSampleData();
@@ -339,6 +345,8 @@ These trends represent exciting opportunities for businesses to enhance their di
         tags: ["Web Development", "AI", "PWA", "Serverless"],
         isPublished: true,
         publishedAt: new Date("2024-01-15"),
+        viewCount: "150",
+        likeCount: "10",
       },
       {
         title: "Mobile App Development: Native vs Cross-Platform in 2024",
@@ -374,6 +382,8 @@ At LOVGOL, we help you choose the right approach based on your specific needs, b
         tags: ["Mobile Apps", "React Native", "Flutter", "iOS", "Android"],
         isPublished: true,
         publishedAt: new Date("2024-01-10"),
+        viewCount: "200",
+        likeCount: "15",
       },
       {
         title: "Automation Success Story: How We Saved DataCorp 500K Annually",
@@ -413,6 +423,8 @@ This project showcases the transformative power of intelligent automation when a
         tags: ["Automation", "Python", "Case Study", "ROI"],
         isPublished: true,
         publishedAt: new Date("2024-01-05"),
+        viewCount: "100",
+        likeCount: "5",
       }
     ];
 
@@ -680,6 +692,8 @@ This project showcases the transformative power of intelligent automation when a
       publishedAt: insertPost.publishedAt || null,
       createdAt: new Date(),
       updatedAt: new Date(),
+      viewCount: "0",
+      likeCount: "0",
     };
     this.blogPosts.set(id, blogPost);
     return blogPost;
@@ -707,7 +721,35 @@ This project showcases the transformative power of intelligent automation when a
     return this.blogPosts.delete(id);
   }
 
+  async incrementBlogPostView(id: string): Promise<BlogPost> {
+    const existing = this.blogPosts.get(id);
+    if (!existing) {
+      throw new Error("Blog post not found");
+    }
+
+    const currentViews = parseInt(existing.viewCount) || 0;
+    const updated: BlogPost = {
+      ...existing,
+      viewCount: (currentViews + 1).toString(),
+    };
+    this.blogPosts.set(id, updated);
+    return updated;
+  }
+
   // Case Study Methods
+  async getCaseStudies(): Promise<CaseStudy[]> {
+    return Array.from(this.caseStudies.values())
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }
+
+  async getCaseStudy(id: string): Promise<CaseStudy | undefined> {
+    return this.caseStudies.get(id);
+  }
+
+  async getCaseStudyBySlug(slug: string): Promise<CaseStudy | undefined> {
+    return Array.from(this.caseStudies.values()).find(cs => cs.slug === slug);
+  }
+
   async createCaseStudy(insertCaseStudy: InsertCaseStudy): Promise<CaseStudy> {
     const id = randomUUID();
     const caseStudy: CaseStudy = {
@@ -720,19 +762,6 @@ This project showcases the transformative power of intelligent automation when a
     };
     this.caseStudies.set(id, caseStudy);
     return caseStudy;
-  }
-
-  async getCaseStudies(): Promise<CaseStudy[]> {
-    return Array.from(this.caseStudies.values())
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-  }
-
-  async getCaseStudy(id: string): Promise<CaseStudy | undefined> {
-    return this.caseStudies.get(id);
-  }
-
-  async getCaseStudyBySlug(slug: string): Promise<CaseStudy | undefined> {
-    return Array.from(this.caseStudies.values()).find(cs => cs.slug === slug);
   }
 
   async updateCaseStudy(id: string, updateCaseStudy: Partial<InsertCaseStudy>): Promise<CaseStudy> {
@@ -790,6 +819,12 @@ This project showcases the transformative power of intelligent automation when a
     return this.projects.get(id);
   }
 
+  async getProjectByToken(token: string): Promise<Project | undefined> {
+    return Array.from(this.projects.values()).find(project => 
+      project.clientAccessToken === token || project.id === token
+    );
+  }
+
   async updateProject(id: string, updateProject: Partial<InsertProject>): Promise<Project> {
     const existing = this.projects.get(id);
     if (!existing) {
@@ -817,10 +852,35 @@ This project showcases the transformative power of intelligent automation when a
     return this.projects.delete(id);
   }
 
-  async getProjectByToken(token: string): Promise<Project | undefined> {
-    return Array.from(this.projects.values()).find(project => 
-      project.clientAccessToken === token || project.id === token
-    );
+  // Blog Reactions
+  async getBlogReactions(): Promise<BlogReaction[]> {
+    return Array.from(this.blogReactions.values());
+  }
+
+  async getBlogReactionsByPostId(postId: string): Promise<BlogReaction[]> {
+    return Array.from(this.blogReactions.values()).filter(reaction => reaction.postId === postId);
+  }
+
+  async createBlogReaction(insertReaction: InsertBlogReaction): Promise<BlogReaction> {
+    const id = randomUUID();
+    const reaction: BlogReaction = {
+      ...insertReaction,
+      id,
+      createdAt: new Date(),
+    };
+    this.blogReactions.set(id, reaction);
+
+    // Update blog post like count if it's a like
+    if (insertReaction.reactionType === 'like') {
+      const post = this.blogPosts.get(insertReaction.postId);
+      if (post) {
+        const currentLikes = parseInt(post.likeCount) || 0;
+        post.likeCount = (currentLikes + 1).toString();
+        this.blogPosts.set(insertReaction.postId, post);
+      }
+    }
+
+    return reaction;
   }
 }
 

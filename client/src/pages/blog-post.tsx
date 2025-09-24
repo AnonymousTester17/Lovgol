@@ -5,6 +5,7 @@ import { ArrowLeft, Calendar, Clock, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import SEOHead from "@/components/SEOHead";
+import BlogReactions from "@/components/BlogReactions";
 import type { BlogPost } from "@shared/schema";
 
 export default function BlogPostPage() {
@@ -260,6 +261,15 @@ export default function BlogPostPage() {
               </div>
             </motion.div>
           )}
+
+          {/* Blog Reactions */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.6 }}
+          >
+            <BlogReactions postId={blogPost.id} likeCount={parseInt(blogPost.likeCount) || 0} />
+          </motion.div>
         </div>
       </section>
     </div>

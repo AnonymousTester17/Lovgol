@@ -45,8 +45,20 @@ export const blogPosts = pgTable("blog_posts", {
   tags: json("tags").$type<string[]>().notNull().default(sql`'[]'::json`),
   isPublished: boolean("is_published").notNull().default(false),
   publishedAt: timestamp("published_at"),
+  viewCount: text("view_count").notNull().default("0"),
+  likeCount: text("like_count").notNull().default("0"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const blogReactions = pgTable("blog_reactions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  postId: varchar("post_id").notNull().references(() => blogPosts.id),
+  userEmail: text("user_email"),
+  userName: text("user_name"),
+  reactionType: text("reaction_type").notNull(), // 'like', 'love', 'insightful', 'helpful'
+  comment: text("comment"),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 export const caseStudies = pgTable("case_studies", {
@@ -169,6 +181,11 @@ export const insertProjectSchema = createInsertSchema(projects).omit({
   clientAccessToken: true,
 });
 
+export const insertBlogReactionSchema = createInsertSchema(blogReactions).omit({
+  id: true,
+  createdAt: true,
+});
+
 export type ServicePreview = typeof servicesPreviews.$inferSelect;
 export type InsertServicePreview = z.infer<typeof insertServicePreviewSchema>;
 export type ContactSubmission = typeof contactSubmissions.$inferSelect;
@@ -181,3 +198,5 @@ export type CaseStudy = typeof caseStudies.$inferSelect;
 export type InsertCaseStudy = z.infer<typeof insertCaseStudySchema>;
 export type Project = typeof projects.$inferSelect;
 export type InsertProject = z.infer<typeof insertProjectSchema>;
+export type BlogReaction = typeof blogReactions.$inferSelect;
+export type InsertBlogReaction = z.infer<typeof insertBlogReactionSchema>;

@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertServicePreviewSchema, insertContactSubmissionSchema, insertInquirySubmissionSchema, insertBlogPostSchema, insertCaseStudySchema, insertProjectSchema } from "@shared/schema";
+import { insertServicePreviewSchema, insertContactSubmissionSchema, insertInquirySubmissionSchema, insertBlogPostSchema, insertCaseStudySchema, insertProjectSchema, insertBlogReactionSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
@@ -165,6 +165,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!post) {
         return res.status(404).json({ message: "Blog post not found" });
       }
+      
+      // Increment view count
+      try {
+        await storage.incrementBlogPostView(post.id);
+      } catch (viewError) {
+        console.log("Failed to increment view count:", viewError);
+      }
+      
       res.json(post);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch blog post" });
@@ -412,6 +420,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ message: "Failed to delete project" });
+    }
+  });
+
+  // Blog Reactions Routes
+  app.get("/api/blog-reactions", async (req, res) => {
+    try {
+      const { postId } = req.query;
+      let reactions;
+      
+      if (postId && typeof postId === 'string') {
+        reactions = await storage.getBlogReactionsByPostId(postId);
+      } else {
+        reactions = await storage.getBlogReactions();
+      }
+      
+      res.json(reactions);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch blog reactions" });
+    }
+  });
+
+  app.post("/api/blog-reactions", async (req, res) => {
+    try {
+      const validatedData = insertBlogReactionSchema.parse(req.body);
+      const reaction = await storage.createBlogReaction(validatedData);
+      res.status(201).json(reaction);
+    } catch (error) {
+      if (error instanceof Error) {
+        res.status(400).json({ message: error.message });
+      } else {
+        res.status(500).json({ message: "Failed to create blog reaction" });
+      }
     }
   });
 
