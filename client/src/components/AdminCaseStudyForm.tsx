@@ -79,9 +79,14 @@ export default function AdminCaseStudyForm({ caseStudy, onSuccess, onCancel }: A
         liveUrl: caseStudy.liveUrl || "",
         serviceId: caseStudy.serviceId || "",
       });
-      setTechnologies(caseStudy.technologies);
-      setResults(caseStudy.results);
-      setImages(caseStudy.images);
+      setTechnologies(caseStudy.technologies || []);
+      setResults(caseStudy.results || []);
+      setImages(caseStudy.images || []);
+    } else {
+      // Reset arrays when creating new case study
+      setTechnologies([]);
+      setResults([]);
+      setImages([]);
     }
   }, [caseStudy, form]);
 
@@ -133,9 +138,9 @@ export default function AdminCaseStudyForm({ caseStudy, onSuccess, onCancel }: A
     setIsSubmitting(true);
     const formData = {
       ...data,
-      technologies,
-      results,
-      images,
+      technologies: technologies || [],
+      results: results || [],
+      images: images || [],
       liveUrl: data.liveUrl || undefined,
       serviceId: data.serviceId || undefined,
     };
@@ -155,29 +160,29 @@ export default function AdminCaseStudyForm({ caseStudy, onSuccess, onCancel }: A
   };
 
   const removeTechnology = (tech: string) => {
-    setTechnologies(technologies.filter(t => t !== tech));
+    setTechnologies((technologies || []).filter(t => t !== tech));
   };
 
   const addResult = () => {
     if (newResult.trim()) {
-      setResults([...results, newResult.trim()]);
+      setResults([...(results || []), newResult.trim()]);
       setNewResult("");
     }
   };
 
   const removeResult = (index: number) => {
-    setResults(results.filter((_, i) => i !== index));
+    setResults((results || []).filter((_, i) => i !== index));
   };
 
   const addImage = () => {
     if (newImage.trim()) {
-      setImages([...images, newImage.trim()]);
+      setImages([...(images || []), newImage.trim()]);
       setNewImage("");
     }
   };
 
   const removeImage = (index: number) => {
-    setImages(images.filter((_, i) => i !== index));
+    setImages((images || []).filter((_, i) => i !== index));
   };
 
   return (
@@ -342,7 +347,7 @@ export default function AdminCaseStudyForm({ caseStudy, onSuccess, onCancel }: A
                 </Button>
               </div>
               <div className="space-y-2">
-                {results.map((result, index) => (
+                {results && results.length > 0 ? results.map((result, index) => (
                   <div key={index} className="flex items-center gap-2 p-2 bg-card rounded">
                     <span className="flex-1">{result}</span>
                     <Button
@@ -354,7 +359,9 @@ export default function AdminCaseStudyForm({ caseStudy, onSuccess, onCancel }: A
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
-                ))}
+                )) : (
+                  <p className="text-sm text-muted-foreground">No results added yet.</p>
+                )}
               </div>
             </div>
 
@@ -385,7 +392,7 @@ export default function AdminCaseStudyForm({ caseStudy, onSuccess, onCancel }: A
                 </Button>
               </div>
               <div className="space-y-2">
-                {images.map((image, index) => (
+                {images && images.length > 0 ? images.map((image, index) => (
                   <div key={index} className="flex items-center gap-2 p-2 bg-card rounded">
                     <img src={image} alt={`Project ${index + 1}`} className="w-16 h-16 object-cover rounded" />
                     <span className="flex-1 text-sm">{image}</span>
@@ -398,7 +405,9 @@ export default function AdminCaseStudyForm({ caseStudy, onSuccess, onCancel }: A
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
-                ))}
+                )) : (
+                  <p className="text-sm text-muted-foreground">No images added yet.</p>
+                )}
               </div>
             </div>
 
