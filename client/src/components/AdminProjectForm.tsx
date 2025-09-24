@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -12,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { useEmailJS } from "@/hooks/useEmailJS";
 import { apiRequest } from "@/lib/queryClient";
 import type { Project } from "@shared/schema";
 
@@ -42,6 +42,7 @@ export default function AdminProjectForm({ project, onSuccess, onCancel }: Admin
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { sendProjectUpdateEmail } = useEmailJS();
 
   const form = useForm<ProjectFormData>({
     resolver: zodResolver(projectFormSchema),
@@ -104,20 +105,57 @@ export default function AdminProjectForm({ project, onSuccess, onCancel }: Admin
 
   const updateMutation = useMutation({
     mutationFn: async (data: ProjectFormData) => {
-      return await apiRequest("PUT", `/api/projects/${project!.id}`, data);
+      // Construct the client project link
+      const clientProjectLink = `${window.location.origin}/projects/${project!.token}`;
+      
+      // Prepare email data
+      const emailData = {
+        to_email: data.clientEmail,
+        client_name: data.clientName,
+        project_title: data.title,
+        progress_percentage: data.progressPercentage,
+        progress_description: data.progressDescription || "No description provided.",
+        client_project_link: clientProjectLink,
+      };
+
+      // Check if progress has actually changed
+      const progressChanged = project?.progressPercentage !== data.progressPercentage ||
+                              project?.progressDescription !== data.progressDescription;
+
+      return await apiRequest("PUT", `/api/projects/${project!.id}`, { ...data, shouldSendEmail: progressChanged, emailData });
     },
-    onSuccess: () => {
+    onSuccess: async (updatedProject: any) => {
       queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
-      toast({
-        title: "Project updated",
-        description: "Project has been updated successfully.",
-      });
+
+      // Send email notification if progress was updated
+      if (updatedProject.shouldSendEmail && updatedProject.emailData) {
+        try {
+          await sendProjectUpdateEmail(updatedProject.emailData);
+          toast({
+            title: "Project updated",
+            description: "Project has been updated and client has been notified via email.",
+          });
+        } catch (emailError) {
+          console.error("Email sending failed:", emailError); // Log the error for debugging
+          toast({
+            title: "Project updated",
+            description: "Project updated successfully, but failed to send email notification.",
+            variant: "destructive",
+          });
+        }
+      } else {
+        toast({
+          title: "Project updated",
+          description: "Project has been updated successfully.",
+        });
+      }
+
       onSuccess();
     },
-    onError: () => {
+    onError: (error: Error) => {
       toast({
         title: "Error",
-        description: "Failed to update project.",
+        description: error.message,
         variant: "destructive",
       });
     },
@@ -170,7 +208,7 @@ export default function AdminProjectForm({ project, onSuccess, onCancel }: Admin
                   <p className="text-red-500 text-sm mt-1">{form.formState.errors.clientName.message}</p>
                 )}
               </div>
-              
+
               <div>
                 <Label htmlFor="clientEmail">Client Email</Label>
                 <Input
@@ -215,7 +253,7 @@ export default function AdminProjectForm({ project, onSuccess, onCancel }: Admin
                   <p className="text-red-500 text-sm mt-1">{form.formState.errors.category.message}</p>
                 )}
               </div>
-              
+
               <div>
                 <Label htmlFor="technology">Technology</Label>
                 <Input
@@ -241,7 +279,7 @@ export default function AdminProjectForm({ project, onSuccess, onCancel }: Admin
                   <p className="text-red-500 text-sm mt-1">{form.formState.errors.progressPercentage.message}</p>
                 )}
               </div>
-              
+
               <div>
                 <Label htmlFor="estimatedDeliveryDays">Estimated Delivery (Days)</Label>
                 <Input
@@ -278,7 +316,7 @@ export default function AdminProjectForm({ project, onSuccess, onCancel }: Admin
                   </SelectContent>
                 </Select>
               </div>
-              
+
               <div>
                 <Label htmlFor="paymentStatus">Payment Status</Label>
                 <Select onValueChange={(value) => form.setValue("paymentStatus", value as any)} defaultValue={form.getValues("paymentStatus")}>
@@ -292,7 +330,7 @@ export default function AdminProjectForm({ project, onSuccess, onCancel }: Admin
                   </SelectContent>
                 </Select>
               </div>
-              
+
               <div>
                 <Label htmlFor="projectHealth">Project Health</Label>
                 <Select onValueChange={(value) => form.setValue("projectHealth", value as any)} defaultValue={form.getValues("projectHealth")}>

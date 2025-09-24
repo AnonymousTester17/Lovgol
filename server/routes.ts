@@ -362,7 +362,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/projects/:id", async (req, res) => {
     try {
       const validatedData = insertProjectSchema.partial().parse(req.body);
+      const oldProject = await storage.getProject(req.params.id);
       const project = await storage.updateProject(req.params.id, validatedData);
+      
+      // Check if progress was updated and send email notification
+      if (oldProject && validatedData.progressPercentage && 
+          oldProject.progressPercentage !== validatedData.progressPercentage) {
+        
+        // Prepare email data for client notification
+        const clientLink = `${req.protocol}://${req.get('host')}/client-project/${project.clientAccessToken}`;
+        const emailData = {
+          to_email: project.clientEmail,
+          to_name: project.clientName,
+          project_title: project.title,
+          progress_percentage: project.progressPercentage,
+          progress_description: project.progressDescription || 'No additional details provided.',
+          client_link: clientLink,
+          estimated_delivery: project.estimatedDeliveryDays,
+          project_health: project.projectHealth,
+          delivery_status: project.deliveryStatus,
+          payment_status: project.paymentStatus,
+        };
+
+        // Set flag to indicate email should be sent from frontend
+        (project as any).shouldSendEmail = true;
+        (project as any).emailData = emailData;
+      }
+      
       res.json(project);
     } catch (error) {
       if (error instanceof Error) {

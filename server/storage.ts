@@ -162,6 +162,7 @@ export interface IStorage {
   createProject(project: InsertProject): Promise<Project>;
   getProjects(): Promise<Project[]>;
   getProject(id: string): Promise<Project | undefined>;
+  getProjectByToken(token: string): Promise<Project | undefined>;
   updateProject(id: string, project: Partial<InsertProject>): Promise<Project>;
   deleteProject(id: string): Promise<boolean>;
 }
@@ -814,6 +815,12 @@ This project showcases the transformative power of intelligent automation when a
 
   async deleteProject(id: string): Promise<boolean> {
     return this.projects.delete(id);
+  }
+
+  async getProjectByToken(token: string): Promise<Project | undefined> {
+    return Array.from(this.projects.values()).find(project => 
+      project.clientAccessToken === token || project.id === token
+    );
   }
 }
 

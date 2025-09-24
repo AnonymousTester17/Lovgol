@@ -18,6 +18,50 @@ export function useEmailJS() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const sendProjectUpdateEmail = async (emailData: any) => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      // Initialize EmailJS if not already done
+      if (!emailjs.init) {
+        emailjs.init(EMAILJS_PUBLIC_KEY);
+      }
+
+      const templateParams = {
+        to_email: emailData.to_email,
+        to_name: emailData.to_name,
+        project_title: emailData.project_title,
+        progress_percentage: emailData.progress_percentage,
+        progress_description: emailData.progress_description,
+        client_link: emailData.client_link,
+        estimated_delivery: emailData.estimated_delivery,
+        project_health: emailData.project_health.toUpperCase(),
+        delivery_status: emailData.delivery_status,
+        payment_status: emailData.payment_status,
+        from_name: "LOVGOL Team",
+        reply_to: "hello@lovgol.com",
+      };
+
+      const response = await emailjs.send(
+        EMAILJS_SERVICE_ID,
+        "template_project_update", // You'll need to create this template in EmailJS
+        templateParams,
+        EMAILJS_PUBLIC_KEY
+      );
+
+      console.log("Project update email sent successfully:", response);
+      return { success: true, response };
+    } catch (err) {
+      console.error("EmailJS error:", err);
+      const errorMessage = err instanceof Error ? err.message : "Failed to send project update email";
+      setError(errorMessage);
+      throw new Error(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const sendEmail = async (data: EmailData) => {
     setIsLoading(true);
     setError(null);
@@ -58,6 +102,7 @@ export function useEmailJS() {
 
   return {
     sendEmail,
+    sendProjectUpdateEmail,
     isLoading,
     error,
   };
