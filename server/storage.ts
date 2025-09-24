@@ -6,37 +6,98 @@ import { randomUUID } from "crypto";
 interface Project {
   id: string;
   title: string;
+  clientName: string;
+  clientEmail: string;
   description: string;
-  currentProgress: number;
+  category: string;
+  technology: string;
+  progressPercentage: string;
   progressDescription: string;
-  estimatedDeliveryDays: number;
-  deliveredState: "completed" | "pending";
-  paymentState: "pending" | "partial" | "completed";
-  milestones: { id: string; description: string; status: "completed" | "pending" }[];
-  teamUpdates: string[];
-  clientFeedback: string[];
-  nextSteps: string[];
-  riskTracker: { id: string; description: string; status: "resolved" | "open" }[];
-  overallHealth: "green" | "yellow" | "red";
-  clientLink: string;
+  estimatedDeliveryDays: string;
+  deliveryStatus: "completed" | "pending";
+  paymentStatus: "pending" | "partial" | "completed";
+  milestones: Array<{
+    id: string;
+    title: string;
+    description: string;
+    status: "pending" | "in_progress" | "completed";
+    dueDate?: string;
+  }>;
+  teamUpdates: Array<{
+    id: string;
+    date: string;
+    update: string;
+    author: string;
+  }>;
+  clientFeedback: Array<{
+    id: string;
+    date: string;
+    feedback: string;
+    type: "general" | "request" | "approval" | "concern";
+  }>;
+  nextSteps: Array<{
+    id: string;
+    task: string;
+    priority: "low" | "medium" | "high";
+    assignee?: string;
+    dueDate?: string;
+  }>;
+  riskIssues: Array<{
+    id: string;
+    title: string;
+    description: string;
+    severity: "low" | "medium" | "high";
+    status: "open" | "resolved";
+    reportedDate: string;
+  }>;
+  projectHealth: "green" | "yellow" | "red";
+  clientAccessToken: string;
   createdAt: Date;
   updatedAt: Date;
 }
 
 interface InsertProject {
   title: string;
+  clientName: string;
+  clientEmail: string;
   description: string;
-  currentProgress: number;
-  progressDescription: string;
-  estimatedDeliveryDays: number;
-  deliveredState?: "completed" | "pending";
-  paymentState?: "pending" | "partial" | "completed";
-  milestones?: { description: string; status: "completed" | "pending" }[];
-  teamUpdates?: string[];
-  clientFeedback?: string[];
-  nextSteps?: string[];
-  riskTracker?: { description: string; status: "resolved" | "open" }[];
-  overallHealth?: "green" | "yellow" | "red";
+  category: string;
+  technology: string;
+  progressPercentage?: string;
+  progressDescription?: string;
+  estimatedDeliveryDays?: string;
+  deliveryStatus?: "completed" | "pending";
+  paymentStatus?: "pending" | "partial" | "completed";
+  milestones?: Array<{
+    title: string;
+    description: string;
+    status: "pending" | "in_progress" | "completed";
+    dueDate?: string;
+  }>;
+  teamUpdates?: Array<{
+    date: string;
+    update: string;
+    author: string;
+  }>;
+  clientFeedback?: Array<{
+    date: string;
+    feedback: string;
+    type: "general" | "request" | "approval" | "concern";
+  }>;
+  nextSteps?: Array<{
+    task: string;
+    priority: "low" | "medium" | "high";
+    assignee?: string;
+    dueDate?: string;
+  }>;
+  riskIssues?: Array<{
+    title: string;
+    description: string;
+    severity: "low" | "medium" | "high";
+    status: "open" | "resolved";
+    reportedDate: string;
+  }>;
+  projectHealth?: "green" | "yellow" | "red";
 }
 
 interface CaseStudy {
@@ -407,60 +468,86 @@ This project showcases the transformative power of intelligent automation when a
     const projectsData: InsertProject[] = [
       {
         title: "Project Alpha",
+        clientName: "TechCorp Inc.",
+        clientEmail: "client@techcorp.com",
         description: "Developing a new mobile application for task management.",
-        currentProgress: 75,
+        category: "app",
+        technology: "react-native",
+        progressPercentage: "75",
         progressDescription: "Completed UI design and core feature implementation. Started API integration.",
-        estimatedDeliveryDays: 15,
-        deliveredState: "pending",
-        paymentState: "partial",
+        estimatedDeliveryDays: "15",
+        deliveryStatus: "pending",
+        paymentStatus: "partial",
         milestones: [
-          { description: "UI Design Complete", status: "completed" },
-          { description: "Core Features Implemented", status: "completed" },
-          { description: "API Integration", status: "pending" },
-          { description: "Testing and QA", status: "pending" },
+          { title: "UI Design Complete", description: "Completed all UI mockups and designs", status: "completed" },
+          { title: "Core Features Implemented", description: "Implemented main functionality", status: "completed" },
+          { title: "API Integration", description: "Integrate with backend APIs", status: "in_progress" },
+          { title: "Testing and QA", description: "Full testing and quality assurance", status: "pending" },
         ],
-        teamUpdates: ["Day 10: API integration is proceeding smoothly."],
-        clientFeedback: ["Client is happy with the current progress and UI."],
-        nextSteps: ["Continue API integration", "Begin unit testing"],
-        riskTracker: [{ description: "Potential delay in third-party API availability", status: "open" }],
-        overallHealth: "yellow",
+        teamUpdates: [
+          { date: "2024-01-10", update: "API integration is proceeding smoothly.", author: "John Doe" }
+        ],
+        clientFeedback: [
+          { date: "2024-01-08", feedback: "Client is happy with the current progress and UI.", type: "general" }
+        ],
+        nextSteps: [
+          { task: "Continue API integration", priority: "high" },
+          { task: "Begin unit testing", priority: "medium" }
+        ],
+        riskIssues: [
+          { title: "API Delay", description: "Potential delay in third-party API availability", severity: "medium", status: "open", reportedDate: "2024-01-05" }
+        ],
+        projectHealth: "yellow",
       },
       {
         title: "Project Beta",
+        clientName: "ShopMaster Ltd.",
+        clientEmail: "client@shopmaster.com",
         description: "Enhancing an existing e-commerce platform.",
-        currentProgress: 90,
+        category: "web",
+        technology: "mern",
+        progressPercentage: "90",
         progressDescription: "Finalizing performance optimizations and security updates.",
-        estimatedDeliveryDays: 5,
-        deliveredState: "pending",
-        paymentState: "completed",
+        estimatedDeliveryDays: "5",
+        deliveryStatus: "pending",
+        paymentStatus: "completed",
         milestones: [
-          { description: "Feature Development", status: "completed" },
-          { description: "Performance Optimization", status: "completed" },
-          { description: "Security Audit", status: "pending" },
+          { title: "Feature Development", description: "Develop new features", status: "completed" },
+          { title: "Performance Optimization", description: "Optimize application performance", status: "completed" },
+          { title: "Security Audit", description: "Complete security review", status: "in_progress" },
         ],
-        teamUpdates: ["Day 20: Security audit scheduled for tomorrow."],
-        clientFeedback: ["Client requested minor adjustments to the checkout flow."],
-        nextSteps: ["Complete security audit", "Deploy to staging environment"],
-        riskTracker: [],
-        overallHealth: "green",
+        teamUpdates: [
+          { date: "2024-01-12", update: "Security audit scheduled for tomorrow.", author: "Jane Smith" }
+        ],
+        clientFeedback: [
+          { date: "2024-01-11", feedback: "Client requested minor adjustments to the checkout flow.", type: "request" }
+        ],
+        nextSteps: [
+          { task: "Complete security audit", priority: "high" },
+          { task: "Deploy to staging environment", priority: "medium" }
+        ],
+        riskIssues: [],
+        projectHealth: "green",
       }
     ];
 
     projectsData.forEach(projectData => {
       const id = randomUUID();
-      const clientLink = `http://localhost:3000/projects/${id}/status`; // Example client link
+      const clientAccessToken = randomUUID();
       const project: Project = {
         ...projectData,
         id,
-        milestones: projectData.milestones || [],
-        teamUpdates: projectData.teamUpdates || [],
-        clientFeedback: projectData.clientFeedback || [],
-        nextSteps: projectData.nextSteps || [],
-        riskTracker: projectData.riskTracker || [],
-        deliveredState: projectData.deliveredState || "pending",
-        paymentState: projectData.paymentState || "pending",
-        overallHealth: projectData.overallHealth || "green",
-        clientLink: clientLink,
+        clientAccessToken,
+        milestones: (projectData.milestones || []).map(m => ({ ...m, id: randomUUID() })),
+        teamUpdates: (projectData.teamUpdates || []).map(t => ({ ...t, id: randomUUID() })),
+        clientFeedback: (projectData.clientFeedback || []).map(c => ({ ...c, id: randomUUID() })),
+        nextSteps: (projectData.nextSteps || []).map(n => ({ ...n, id: randomUUID() })),
+        riskIssues: (projectData.riskIssues || []).map(r => ({ ...r, id: randomUUID() })),
+        deliveryStatus: projectData.deliveryStatus || "pending",
+        paymentStatus: projectData.paymentStatus || "pending",
+        projectHealth: projectData.projectHealth || "green",
+        progressPercentage: projectData.progressPercentage || "0",
+        estimatedDeliveryDays: projectData.estimatedDeliveryDays || "30",
         createdAt: new Date(),
         updatedAt: new Date(),
       };
@@ -671,19 +758,21 @@ This project showcases the transformative power of intelligent automation when a
   // Project Methods
   async createProject(insertProject: InsertProject): Promise<Project> {
     const id = randomUUID();
-    const clientLink = `http://localhost:3000/projects/${id}/status`; // Example client link
+    const clientAccessToken = randomUUID();
     const project: Project = {
       ...insertProject,
       id,
-      milestones: insertProject.milestones || [],
-      teamUpdates: insertProject.teamUpdates || [],
-      clientFeedback: insertProject.clientFeedback || [],
-      nextSteps: insertProject.nextSteps || [],
-      riskTracker: insertProject.riskTracker || [],
-      deliveredState: insertProject.deliveredState || "pending",
-      paymentState: insertProject.paymentState || "pending",
-      overallHealth: insertProject.overallHealth || "green",
-      clientLink: clientLink,
+      clientAccessToken,
+      milestones: (insertProject.milestones || []).map(m => ({ ...m, id: randomUUID() })),
+      teamUpdates: (insertProject.teamUpdates || []).map(t => ({ ...t, id: randomUUID() })),
+      clientFeedback: (insertProject.clientFeedback || []).map(c => ({ ...c, id: randomUUID() })),
+      nextSteps: (insertProject.nextSteps || []).map(n => ({ ...n, id: randomUUID() })),
+      riskIssues: (insertProject.riskIssues || []).map(r => ({ ...r, id: randomUUID() })),
+      deliveryStatus: insertProject.deliveryStatus || "pending",
+      paymentStatus: insertProject.paymentStatus || "pending",
+      projectHealth: insertProject.projectHealth || "green",
+      progressPercentage: insertProject.progressPercentage || "0",
+      estimatedDeliveryDays: insertProject.estimatedDeliveryDays || "30",
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -709,14 +798,14 @@ This project showcases the transformative power of intelligent automation when a
     const updated: Project = {
       ...existing,
       ...updateProject,
-      milestones: updateProject.milestones !== undefined ? updateProject.milestones : existing.milestones,
-      teamUpdates: updateProject.teamUpdates !== undefined ? updateProject.teamUpdates : existing.teamUpdates,
-      clientFeedback: updateProject.clientFeedback !== undefined ? updateProject.clientFeedback : existing.clientFeedback,
-      nextSteps: updateProject.nextSteps !== undefined ? updateProject.nextSteps : existing.nextSteps,
-      riskTracker: updateProject.riskTracker !== undefined ? updateProject.riskTracker : existing.riskTracker,
-      deliveredState: updateProject.deliveredState || existing.deliveredState,
-      paymentState: updateProject.paymentState || existing.paymentState,
-      overallHealth: updateProject.overallHealth || existing.overallHealth,
+      milestones: updateProject.milestones !== undefined ? updateProject.milestones.map(m => ({ ...m, id: m.id || randomUUID() })) : existing.milestones,
+      teamUpdates: updateProject.teamUpdates !== undefined ? updateProject.teamUpdates.map(t => ({ ...t, id: t.id || randomUUID() })) : existing.teamUpdates,
+      clientFeedback: updateProject.clientFeedback !== undefined ? updateProject.clientFeedback.map(c => ({ ...c, id: c.id || randomUUID() })) : existing.clientFeedback,
+      nextSteps: updateProject.nextSteps !== undefined ? updateProject.nextSteps.map(n => ({ ...n, id: n.id || randomUUID() })) : existing.nextSteps,
+      riskIssues: updateProject.riskIssues !== undefined ? updateProject.riskIssues.map(r => ({ ...r, id: r.id || randomUUID() })) : existing.riskIssues,
+      deliveryStatus: updateProject.deliveryStatus || existing.deliveryStatus,
+      paymentStatus: updateProject.paymentStatus || existing.paymentStatus,
+      projectHealth: updateProject.projectHealth || existing.projectHealth,
       updatedAt: new Date(),
     };
     this.projects.set(id, updated);

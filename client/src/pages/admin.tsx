@@ -166,6 +166,14 @@ export default function Admin() {
   };
 
   const copyClientLink = (token: string) => {
+    if (!token) {
+      toast({
+        title: "Error",
+        description: "No client access token found for this project.",
+        variant: "destructive",
+      });
+      return;
+    }
     const link = `${window.location.origin}/client-project/${token}`;
     navigator.clipboard.writeText(link);
     toast({
@@ -388,7 +396,7 @@ export default function Admin() {
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => copyClientLink(project.clientAccessToken)}
+                            onClick={() => copyClientLink(project.clientAccessToken || project.id)}
                             data-testid={`button-copy-link-${project.id}`}
                           >
                             <Copy className="h-4 w-4" />
@@ -413,13 +421,13 @@ export default function Admin() {
                       </div>
                       <div className="flex flex-wrap gap-2">
                         <Badge variant="secondary" data-testid={`badge-progress-${project.id}`}>
-                          {project.progressPercentage}%
+                          {project.currentProgress || project.progressPercentage || 0}%
                         </Badge>
                         <Badge 
-                          variant={project.projectHealth === 'green' ? 'default' : project.projectHealth === 'yellow' ? 'secondary' : 'destructive'} 
+                          variant={(project.projectHealth || project.overallHealth) === 'green' ? 'default' : (project.projectHealth || project.overallHealth) === 'yellow' ? 'secondary' : 'destructive'} 
                           data-testid={`badge-health-${project.id}`}
                         >
-                          {project.projectHealth.toUpperCase()}
+                          {((project.projectHealth || project.overallHealth) || 'unknown').toUpperCase()}
                         </Badge>
                       </div>
                     </CardHeader>
@@ -431,16 +439,16 @@ export default function Admin() {
                         <strong>Delivery:</strong> {project.estimatedDeliveryDays} days
                       </p>
                       <p className="text-sm text-muted-foreground mb-4" data-testid={`text-payment-${project.id}`}>
-                        <strong>Payment:</strong> {project.paymentStatus}
+                        <strong>Payment:</strong> {project.paymentState || project.paymentStatus || 'pending'}
                       </p>
                       <div className="w-full bg-gray-200 rounded-full h-2">
                         <div 
                           className="bg-primary h-2 rounded-full transition-all duration-300" 
-                          style={{ width: `${project.progressPercentage}%` }}
+                          style={{ width: `${project.currentProgress || project.progressPercentage || 0}%` }}
                         ></div>
                       </div>
                       <p className="text-xs text-muted-foreground mt-2 text-center">
-                        Progress: {project.progressPercentage}%
+                        Progress: {project.currentProgress || project.progressPercentage || 0}%
                       </p>
                     </CardContent>
                   </Card>
