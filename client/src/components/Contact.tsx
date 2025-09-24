@@ -46,7 +46,7 @@ export default function Contact() {
     mutationFn: async (data: ContactFormData) => {
       // Save to database
       await apiRequest("POST", "/api/contact-submissions", data);
-      
+
       // Send email via EmailJS
       await sendEmail({
         from_name: data.name,
@@ -244,14 +244,17 @@ export default function Contact() {
 
           {/* Contact Info */}
           <motion.div
-            initial={{ opacity: 0, x: 50 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8 }}
+            initial={{ opacity: 0, x: -50, rotateY: -15 }}
+            whileInView={{ opacity: 1, x: 0, rotateY: 0 }}
+            transition={{
+              duration: 1,
+              type: "spring",
+              stiffness: 100
+            }}
             viewport={{ once: true }}
-            className="space-y-8"
-            data-testid="contact-info"
+            className="animate-slide-fade stagger-1"
           >
-            <Card className="glass-card" data-testid="contact-email">
+            <Card className="glass-morphism magnetic-hover" data-testid="contact-info">
               <CardContent className="p-6">
                 <div className="flex items-center space-x-4">
                   <div className="bg-primary/20 p-3 rounded-lg">

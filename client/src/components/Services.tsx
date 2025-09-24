@@ -134,7 +134,7 @@ export default function Services({ onServiceClick }: ServicesProps) {
               Scroll down to see our development process unfold step by step
             </p>
           </div>
-          
+
           <div style={{ height: "200vh" }} className="relative">
             <ImageSequenceScroll
               images={[
@@ -170,44 +170,29 @@ export default function Services({ onServiceClick }: ServicesProps) {
             {filteredServices.map((service: ServicePreview, index) => (
               <motion.div
                 key={service.id}
-                layout
-                initial={{ opacity: 0, y: 50, scale: 0.9 }}
-                animate={{ 
-                  opacity: 1, 
-                  y: 0, 
-                  scale: 1,
-                  transition: {
-                    duration: 0.6,
-                    delay: index * 0.1,
-                    ease: [0.25, 0.46, 0.45, 0.94]
-                  }
-                }}
-                exit={{ 
-                  opacity: 0, 
-                  y: -50, 
-                  scale: 0.8,
-                  transition: {
-                    duration: 0.4,
-                    ease: [0.25, 0.46, 0.45, 0.94]
-                  }
+                className="service-card glass-morphism rounded-xl overflow-hidden group cursor-pointer transform-gpu magnetic-hover hover-lift"
+                data-testid={`service-card-${service.id}`}
+                initial={{ opacity: 0, y: 50, rotateX: -15 }}
+                animate={{ opacity: 1, y: 0, rotateX: 0 }}
+                transition={{ 
+                  duration: 0.8, 
+                  delay: index * 0.15,
+                  type: "spring",
+                  stiffness: 100
                 }}
                 whileHover={{ 
-                  y: -15, 
-                  scale: 1.05,
-                  rotateY: 5,
-                  transition: {
-                    duration: 0.3,
-                    ease: [0.25, 0.46, 0.45, 0.94]
-                  }
+                  y: -25, 
+                  scale: 1.08,
+                  rotateY: 8,
+                  rotateX: 5,
+                  boxShadow: "0 30px 60px rgba(59, 130, 246, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1)"
                 }}
                 whileTap={{ 
                   scale: 0.98,
                   transition: { duration: 0.1 }
                 }}
-                className="service-card glass-card rounded-xl overflow-hidden cursor-pointer relative group transform-gpu perspective-1000"
-                onClick={() => onServiceClick(service)}
-                data-testid={`service-card-${service.id}`}
                 style={{ transformStyle: "preserve-3d" }}
+                onClick={() => onServiceClick(service)}
               >
                 {service.imageUrl && (
                   <div className="relative overflow-hidden">
@@ -278,7 +263,7 @@ export default function Services({ onServiceClick }: ServicesProps) {
                   >
                     {service.description}
                   </motion.p>
-                  
+
                   {/* Case Study Link Overlay */}
                   {(service.technology === "mern" || service.technology === "react-native" || service.technology === "python") && (
                     <motion.div 

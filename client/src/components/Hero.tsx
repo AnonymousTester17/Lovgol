@@ -44,9 +44,9 @@ export default function Hero() {
       <div className="absolute inset-0 hero-gradient z-10" />
       
       <div className="relative z-20 text-center px-4 sm:px-6 lg:px-8">
-        <div className="animate-fade-in-up opacity-0" style={{ animationDelay: '0.2s' }}>
+        <div className="animate-bounce-in opacity-0" style={{ animationDelay: '0.2s' }}>
           <h1 
-            className="hero-text text-6xl md:text-8xl font-black mb-6 masked-text leading-tight"
+            className="hero-text text-6xl md:text-8xl font-black mb-6 masked-text leading-tight animate-gradient neon-glow"
             data-testid="hero-title"
           >
             LOVGOL
@@ -78,8 +78,8 @@ export default function Hero() {
       </div>
       
       {/* Scroll Indicator */}
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20 animate-bounce">
-        <ChevronDown className="h-8 w-8 text-muted-foreground" data-testid="scroll-indicator" />
+      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20 animate-float">
+        <ChevronDown className="h-8 w-8 text-muted-foreground animate-pulse-glow" data-testid="scroll-indicator" />
       </div>
     </section>
   );
