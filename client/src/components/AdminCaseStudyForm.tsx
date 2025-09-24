@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -206,7 +205,7 @@ export default function AdminCaseStudyForm({ caseStudy, onSuccess, onCancel }: A
                   <p className="text-red-500 text-sm mt-1">{form.formState.errors.title.message}</p>
                 )}
               </div>
-              
+
               <div>
                 <Label htmlFor="slug">Slug</Label>
                 <Input
@@ -232,7 +231,7 @@ export default function AdminCaseStudyForm({ caseStudy, onSuccess, onCancel }: A
                   <p className="text-red-500 text-sm mt-1">{form.formState.errors.client.message}</p>
                 )}
               </div>
-              
+
               <div>
                 <Label htmlFor="industry">Industry</Label>
                 <Input
@@ -258,7 +257,7 @@ export default function AdminCaseStudyForm({ caseStudy, onSuccess, onCancel }: A
                   <p className="text-red-500 text-sm mt-1">{form.formState.errors.timeline.message}</p>
                 )}
               </div>
-              
+
               <div>
                 <Label htmlFor="teamSize">Team Size</Label>
                 <Input
@@ -287,7 +286,7 @@ export default function AdminCaseStudyForm({ caseStudy, onSuccess, onCancel }: A
                 </Button>
               </div>
               <div className="flex flex-wrap gap-2">
-                {technologies.map((tech) => (
+                {technologies && technologies.map((tech) => (
                   <Badge key={tech} variant="secondary" className="flex items-center gap-1">
                     {tech}
                     <button

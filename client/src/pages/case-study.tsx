@@ -69,15 +69,15 @@ export default function CaseStudy() {
       "applicationCategory": caseStudy.industry,
       "operatingSystem": "Web"
     },
-    "keywords": caseStudy.technologies.join(", ")
+    "keywords": caseStudy.technologies ? caseStudy.technologies.join(", ") : ""
   };
 
   return (
     <div className="min-h-screen bg-background" data-testid="case-study-page">
       <SEOHead
         title={`${caseStudy.title} - Case Study | LOVGOL`}
-        description={`Learn how LOVGOL helped ${caseStudy.client} with ${caseStudy.title}. ${caseStudy.challenge.substring(0, 120)}...`}
-        keywords={`case study, ${caseStudy.industry}, ${caseStudy.technologies.join(", ")}, ${caseStudy.client}`}
+        description={`Learn how LOVGOL helped ${caseStudy.client} with ${caseStudy.title}. ${caseStudy.challenge ? caseStudy.challenge.substring(0, 120) + '...' : ''}`}
+        keywords={`case study, ${caseStudy.industry}, ${caseStudy.technologies ? caseStudy.technologies.join(", ") : ""}, ${caseStudy.client}`}
         image={caseStudy.heroImage}
         url={`https://lovgol.com/case-study/${caseStudy.slug}`}
         type="article"
@@ -166,12 +166,12 @@ export default function CaseStudy() {
                 <Code className="h-8 w-8 mx-auto mb-4 text-primary" />
                 <h3 className="text-lg font-semibold mb-2">Technologies</h3>
                 <div className="flex flex-wrap gap-1 justify-center">
-                  {caseStudy.technologies.slice(0, 3).map((tech, index) => (
+                  {caseStudy.technologies && caseStudy.technologies.slice(0, 3).map((tech, index) => (
                     <Badge key={index} variant="outline" className="text-xs">
                       {tech}
                     </Badge>
                   ))}
-                  {caseStudy.technologies.length > 3 && (
+                  {caseStudy.technologies && caseStudy.technologies.length > 3 && (
                     <Badge variant="outline" className="text-xs">
                       +{caseStudy.technologies.length - 3} more
                     </Badge>
@@ -221,7 +221,7 @@ export default function CaseStudy() {
             className="grid grid-cols-1 md:grid-cols-2 gap-8"
             data-testid="project-images"
           >
-            {caseStudy.images.map((image, index) => (
+            {caseStudy.images && caseStudy.images.map((image, index) => (
               <motion.img
                 key={index}
                 src={image}
@@ -247,7 +247,7 @@ export default function CaseStudy() {
           >
             <h2 className="text-4xl font-bold mb-12 text-center masked-text">Results That Matter</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8" data-testid="results-section">
-              {caseStudy.results.map((result, index) => (
+              {caseStudy.results && caseStudy.results.map((result, index) => (
                 <motion.div
                   key={index}
                   initial={{ opacity: 0, x: index % 2 === 0 ? -30 : 30 }}
