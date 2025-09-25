@@ -33,7 +33,6 @@ const VideoPlayer = () => {
         playsInline
         className="video-player"
       />
-      <div className="video-vignette" />
     </div>
   );
 };

@@ -1,320 +1,85 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import ImageSequenceScroll from "./ImageSequenceScroll";
+import { useInView } from "react-intersection-observer";
+import { Button } from "./ui/button";
+import { ArrowRight } from "lucide-react";
 import type { ServicePreview } from "@shared/schema";
+
+const services: ServicePreview[] = [
+  {
+    name: "Web Development",
+    description: "Crafting beautiful, high-performance websites tailored to your business needs.",
+    technologies: ["React", "Node.js", "TypeScript", "TailwindCSS"],
+  },
+  {
+    name: "Mobile App Development",
+    description: "Building intuitive and engaging mobile applications for both iOS and Android platforms.",
+    technologies: ["React Native", "Flutter", "Swift", "Kotlin"],
+  },
+  {
+    name: "Automation & AI",
+    description: "Streamlining your business processes with custom automation and AI-powered solutions.",
+    technologies: ["Python", "LangChain", "OpenAI API", "Selenium"],
+  },
+];
 
 interface ServicesProps {
   onServiceClick: (service: ServicePreview) => void;
 }
 
 export default function Services({ onServiceClick }: ServicesProps) {
-  const [activeCategory, setActiveCategory] = useState<string>("all");
-  const [activeTechnology, setActiveTechnology] = useState<string>("");
-
-  const { data: allServices = [], isLoading } = useQuery({
-    queryKey: ["/api/service-previews"],
+  const { ref, inView } = useInView({
+    triggerOnce: true,
+    threshold: 0.1,
   });
 
-  const getFilteredServices = () => {
-    if (activeTechnology) {
-      return allServices.filter((service: ServicePreview) => service.technology === activeTechnology);
-    }
-    if (activeCategory === "all") {
-      return allServices;
-    }
-    return allServices.filter((service: ServicePreview) => service.category === activeCategory);
-  };
-
-  const filteredServices = getFilteredServices();
-
-  const categories = [
-    { id: "all", label: "All Services" },
-    { id: "web", label: "Website Development" },
-    { id: "app", label: "App Development" },
-    { id: "automation", label: "Automations" },
-  ];
-
-  const technologies = {
-    web: [
-      { id: "mern", label: "MERN Stack" },
-      { id: "php", label: "PHP" },
-      { id: "wordpress", label: "WordPress" },
-    ],
-    app: [
-      { id: "react-native", label: "React Native" },
-      { id: "flutter", label: "Flutter" },
-    ],
-    automation: [
-      { id: "python", label: "Python" },
-      { id: "nodejs", label: "Node.js" },
-    ],
-  };
-
-  const handleCategoryChange = (categoryId: string) => {
-    setActiveCategory(categoryId);
-    setActiveTechnology("");
-  };
-
-  const handleTechnologyChange = (technologyId: string) => {
-    setActiveTechnology(technologyId);
-  };
-
-  if (isLoading) {
-    return (
-      <section id="services" className="py-20 bg-background" data-testid="services-section">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center" data-testid="loading-services">Loading services...</div>
-        </div>
-      </section>
-    );
-  }
-
   return (
-    <section id="services" className="py-20 bg-background" data-testid="services-section">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section Header */}
-        <div className="text-center mb-16">
-          <h2 className="text-6xl font-black mb-6 masked-text leading-tight" data-testid="services-title">
-            Our Services
+    <section 
+      id="services" 
+      className="py-20 px-4 sm:px-6 lg:px-8"
+      ref={ref}
+    >
+      <div className="max-w-7xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: inView ? 1 : 0, y: inView ? 0 : 50 }}
+          transition={{ duration: 0.8 }}
+        >
+          <h2 className="text-4xl font-extrabold text-center mb-4 text-white">
+            Our <span className="text-primary">Services</span>
           </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto" data-testid="services-description">
-            From concept to deployment, we offer comprehensive digital solutions
+          <p className="text-lg text-gray-400 text-center max-w-3xl mx-auto mb-12">
+            We offer a comprehensive suite of services to bring your digital ideas to life. From web and mobile development to cutting-edge AI solutions, we have you covered.
           </p>
-        </div>
+        </motion.div>
 
-        {/* Category Filters */}
-        <div className="mb-12">
-          <div className="flex flex-wrap justify-center gap-4 mb-8">
-            {categories.map((category) => (
-              <Button
-                key={category.id}
-                onClick={() => handleCategoryChange(category.id)}
-                variant={activeCategory === category.id ? "default" : "outline"}
-                className={`px-6 py-3 rounded-full glass-card transition-all duration-300 ${
-                  activeCategory === category.id ? "bg-primary text-primary-foreground" : ""
-                }`}
-                data-testid={`filter-${category.id}`}
-              >
-                {category.label}
-              </Button>
-            ))}
-          </div>
-
-          {/* Technology Sub-filters */}
-          {activeCategory !== "all" && technologies[activeCategory as keyof typeof technologies] && (
-            <div className="text-center">
-              <div className="flex flex-wrap justify-center gap-2">
-                {technologies[activeCategory as keyof typeof technologies].map((tech) => (
-                  <Button
-                    key={tech.id}
-                    onClick={() => handleTechnologyChange(tech.id)}
-                    variant={activeTechnology === tech.id ? "default" : "outline"}
-                    size="sm"
-                    className={`px-4 py-2 rounded-lg glass-card text-sm ${
-                      activeTechnology === tech.id ? "bg-primary text-primary-foreground" : ""
-                    }`}
-                    data-testid={`sub-filter-${tech.id}`}
-                  >
-                    {tech.label}
-                  </Button>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {services.map((service, index) => (
+            <motion.div
+              key={service.name}
+              className="bg-gray-800 rounded-lg p-6 flex flex-col shadow-lg hover:shadow-primary/50 transition-shadow duration-300"
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: inView ? 1 : 0, y: inView ? 0 : 50 }}
+              transition={{ duration: 0.8, delay: index * 0.2 }}
+            >
+              <h3 className="text-2xl font-bold text-white mb-3">{service.name}</h3>
+              <p className="text-gray-400 mb-4 flex-grow">{service.description}</p>
+              <div className="flex flex-wrap gap-2 mb-6">
+                {service.technologies.map((tech) => (
+                  <span key={tech} className="bg-primary/20 text-primary text-xs font-semibold px-2.5 py-1 rounded-full">
+                    {tech}
+                  </span>
                 ))}
               </div>
-            </div>
-          )}
-        </div>
-
-        {/* Image Sequence Demo Section */}
-        <div className="mb-20">
-          <div className="text-center mb-12">
-            <h3 className="text-4xl font-bold mb-4 masked-text">See Our Work in Action</h3>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Scroll down to see our development process unfold step by step
-            </p>
-          </div>
-          
-          <div style={{ height: "200vh" }} className="relative">
-            <ImageSequenceScroll
-              images={[
-                "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=600&fit=crop",
-                "https://images.unsplash.com/photo-1551650975-87deedd944c3?w=800&h=600&fit=crop", 
-                "https://images.unsplash.com/photo-1557804506-669a67965ba0?w=800&h=600&fit=crop",
-                "https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=800&h=600&fit=crop",
-                "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=600&fit=crop"
-              ]}
-              className="w-full max-w-4xl mx-auto"
-              triggerHeight={600}
-            />
-          </div>
-        </div>
-
-        {/* Service Cards */}
-        {filteredServices.length === 0 ? (
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="text-center py-8 text-muted-foreground" 
-            data-testid="no-services"
-          >
-            No services found for the selected filters.
-          </motion.div>
-        ) : (
-          <motion.div 
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
-            layout
-            data-testid="services-grid"
-          >
-            {filteredServices.map((service: ServicePreview, index) => (
-              <motion.div
-                key={service.id}
-                layout
-                initial={{ opacity: 0, y: 50, scale: 0.9 }}
-                animate={{ 
-                  opacity: 1, 
-                  y: 0, 
-                  scale: 1,
-                  transition: {
-                    duration: 0.6,
-                    delay: index * 0.1,
-                    ease: [0.25, 0.46, 0.45, 0.94]
-                  }
-                }}
-                exit={{ 
-                  opacity: 0, 
-                  y: -50, 
-                  scale: 0.8,
-                  transition: {
-                    duration: 0.4,
-                    ease: [0.25, 0.46, 0.45, 0.94]
-                  }
-                }}
-                whileHover={{ 
-                  y: -15, 
-                  scale: 1.05,
-                  rotateY: 5,
-                  transition: {
-                    duration: 0.3,
-                    ease: [0.25, 0.46, 0.45, 0.94]
-                  }
-                }}
-                whileTap={{ 
-                  scale: 0.98,
-                  transition: { duration: 0.1 }
-                }}
-                className="service-card glass-card rounded-xl overflow-hidden cursor-pointer relative group transform-gpu perspective-1000"
-                onClick={() => onServiceClick(service)}
-                data-testid={`service-card-${service.id}`}
-                style={{ transformStyle: "preserve-3d" }}
+              <Button 
+                onClick={() => onServiceClick(service)} 
+                className="mt-auto w-full"
+                variant="outline"
               >
-                {service.imageUrl && (
-                  <div className="relative overflow-hidden">
-                    <motion.img
-                      src={service.imageUrl}
-                      alt={service.title}
-                      className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-110"
-                      initial={{ scale: 1.1, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      transition={{ duration: 0.6, delay: index * 0.1 + 0.2 }}
-                      data-testid={`service-image-${service.id}`}
-                    />
-                    <motion.div 
-                      className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100"
-                      transition={{ duration: 0.3 }}
-                    />
-                  </div>
-                )}
-                <motion.div 
-                  className="p-6"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: index * 0.1 + 0.3 }}
-                >
-                  <motion.div 
-                    className="flex flex-wrap gap-2 mb-3"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4, delay: index * 0.1 + 0.4 }}
-                  >
-                    {service.tags.slice(0, 2).map((tag, tagIndex) => (
-                      <motion.div
-                        key={tagIndex}
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ 
-                          duration: 0.3, 
-                          delay: index * 0.1 + 0.5 + tagIndex * 0.1,
-                          ease: "backOut"
-                        }}
-                        whileHover={{ scale: 1.1 }}
-                      >
-                        <Badge
-                          variant="secondary"
-                          className="bg-primary/20 text-primary text-xs px-2 py-1 rounded transition-all duration-200 hover:bg-primary/30"
-                          data-testid={`service-tag-${service.id}-${tagIndex}`}
-                        >
-                          {tag}
-                        </Badge>
-                      </motion.div>
-                    ))}
-                  </motion.div>
-                  <motion.h3 
-                    className="text-lg font-semibold mb-2 group-hover:text-primary transition-colors duration-300" 
-                    data-testid={`service-title-${service.id}`}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4, delay: index * 0.1 + 0.5 }}
-                  >
-                    {service.title}
-                  </motion.h3>
-                  <motion.p 
-                    className="text-muted-foreground text-sm leading-relaxed" 
-                    data-testid={`service-description-${service.id}`}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4, delay: index * 0.1 + 0.6 }}
-                  >
-                    {service.description}
-                  </motion.p>
-                  
-                  {/* Case Study Link Overlay */}
-                  {(service.technology === "mern" || service.technology === "react-native" || service.technology === "python") && (
-                    <motion.div 
-                      className="absolute inset-0 bg-gradient-to-br from-black/90 via-black/80 to-black/70 opacity-0 group-hover:opacity-100 flex items-center justify-center backdrop-blur-sm"
-                      initial={{ opacity: 0 }}
-                      whileHover={{ opacity: 1 }}
-                      transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
-                    >
-                      <motion.button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          const caseStudySlug = service.technology === "mern" ? "ecommerce-platform" :
-                                              service.technology === "react-native" ? "mobile-fitness-app" : 
-                                              "automation-pipeline";
-                          window.location.href = `/case-study/${caseStudySlug}`;
-                        }}
-                        className="bg-primary hover:bg-primary/80 text-primary-foreground px-6 py-3 rounded-lg font-medium transition-all duration-300 shadow-lg hover:shadow-xl"
-                        data-testid={`case-study-link-${service.id}`}
-                        initial={{ scale: 0.8, y: 20, opacity: 0 }}
-                        whileHover={{ 
-                          scale: 1.05, 
-                          y: 0, 
-                          opacity: 1,
-                          transition: { duration: 0.3, delay: 0.1 }
-                        }}
-                        whileTap={{ scale: 0.95 }}
-                      >
-                        View Case Study
-                      </motion.button>
-                    </motion.div>
-                  )}
-                </motion.div>
-              </motion.div>
-            ))}
-          </motion.div>
-        )}
+                Learn More <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </motion.div>
+          ))}
+        </div>
       </div>
     </section>
   );
