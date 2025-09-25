@@ -10,6 +10,7 @@ import InquiryModal from "@/components/InquiryModal";
 import SEOHead from "@/components/SEOHead";
 import { useState } from "react";
 import type { ServicePreview } from "@shared/schema";
+import VideoPlayer from "@/components/VideoPlayer";
 
 export default function Home() {
   const [selectedService, setSelectedService] = useState<ServicePreview | null>(null);
@@ -51,7 +52,7 @@ export default function Home() {
     "numberOfEmployees": "10-50",
     "knowsAbout": [
       "Web Development",
-      "Mobile App Development", 
+      "Mobile App Development",
       "Automation",
       "MERN Stack",
       "React Native",
@@ -79,13 +80,15 @@ export default function Home() {
       <Contact />
       <Footer />
       
+      <VideoPlayer />
+
       <ServiceModal
         service={selectedService}
         isOpen={showServiceModal}
         onClose={() => setShowServiceModal(false)}
         onInquiryClick={handleInquiryClick}
       />
-      
+
       <InquiryModal
         isOpen={showInquiryModal}
         onClose={() => setShowInquiryModal(false)}
