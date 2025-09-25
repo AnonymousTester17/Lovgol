@@ -24,14 +24,14 @@ const VideoPlayer = () => {
   };
 
   return (
-    <div className="video-container">
+    <div className="relative overflow-hidden rounded-lg shadow-xl border border-gray-700 bg-gray-800 aspect-video">
       <video
         ref={videoRef}
         onEnded={handleVideoEnded}
         muted
         autoPlay
         playsInline
-        className="video-player"
+        className="absolute inset-0 w-full h-full object-cover rounded-lg"
       />
     </div>
   );

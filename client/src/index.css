@@ -315,15 +315,4 @@ body {
 
 
 .video-container {
-  position: relative;
-  width: 70%;
-  max-width: 4xl;
-  margin: 0 auto;
-  overflow: hidden;
-}
-
-.video-player {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
 }

@@ -6,10 +6,33 @@ import { useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Card, CardContent } from "@/components/ui/card";
-import { Mail, Phone, MapPin, Send, MessageCircle, Twitter, Linkedin, Github, Instagram } from "lucide-react";
+import {
+  Mail,
+  Phone,
+  MapPin,
+  Send,
+  MessageCircle,
+  Twitter,
+  Linkedin,
+  Github,
+  Instagram,
+} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { openWhatsApp } from "@/lib/whatsapp";
@@ -46,7 +69,7 @@ export default function Contact() {
     mutationFn: async (data: ContactFormData) => {
       // Save to database
       await apiRequest("POST", "/api/contact-submissions", data);
-      
+
       // Send email via EmailJS
       await sendEmail({
         from_name: data.name,
@@ -82,19 +105,36 @@ export default function Contact() {
 
   const handleWhatsAppClick = () => {
     const formData = form.getValues();
-    const message = `Hi LOVGOL,\n\nName: ${formData.name || 'Not specified'}\nEmail: ${formData.email || 'Not specified'}\nService: ${formData.service || 'Not specified'}\nBudget: ${formData.budget || 'Not specified'}\nMessage: ${formData.message || 'Not specified'}`;
+    const message = `Hi LOVGOL,\n\nName: ${
+      formData.name || "Not specified"
+    }\nEmail: ${formData.email || "Not specified"}\nService: ${
+      formData.service || "Not specified"
+    }\nBudget: ${formData.budget || "Not specified"}\nMessage: ${
+      formData.message || "Not specified"
+    }`;
     openWhatsApp(message);
   };
 
   return (
-    <section id="contact" className="py-20 bg-background" data-testid="contact-section">
+    <section
+      id="contact"
+      className="py-20 bg-background"
+      data-testid="contact-section"
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-6xl font-black mb-6 masked-text" data-testid="contact-title">
+          <h2
+            className="text-6xl font-black mb-6 masked-text"
+            data-testid="contact-title"
+          >
             Get In Touch
           </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto" data-testid="contact-description">
-            Ready to start your project? Let's discuss how we can bring your vision to life.
+          <p
+            className="text-xl text-muted-foreground max-w-3xl mx-auto"
+            data-testid="contact-description"
+          >
+            Ready to start your project? Let's discuss how we can bring your
+            vision to life.
           </p>
         </div>
 
@@ -109,7 +149,11 @@ export default function Contact() {
             data-testid="contact-form-container"
           >
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6" data-testid="contact-form">
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-6"
+                data-testid="contact-form"
+              >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <FormField
                     control={form.control}
@@ -156,16 +200,28 @@ export default function Contact() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Service Interested In</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
                         <FormControl>
-                          <SelectTrigger className="bg-input border-border" data-testid="select-service">
+                          <SelectTrigger
+                            className="bg-input border-border"
+                            data-testid="select-service"
+                          >
                             <SelectValue placeholder="Select a service" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="web-development">Website Development</SelectItem>
-                          <SelectItem value="app-development">App Development</SelectItem>
-                          <SelectItem value="automation">Automation Solutions</SelectItem>
+                          <SelectItem value="web-development">
+                            Website Development
+                          </SelectItem>
+                          <SelectItem value="app-development">
+                            App Development
+                          </SelectItem>
+                          <SelectItem value="automation">
+                            Automation Solutions
+                          </SelectItem>
                           <SelectItem value="consulting">Consulting</SelectItem>
                         </SelectContent>
                       </Select>
@@ -180,16 +236,28 @@ export default function Contact() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Budget Range</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
                         <FormControl>
-                          <SelectTrigger className="bg-input border-border" data-testid="select-budget">
+                          <SelectTrigger
+                            className="bg-input border-border"
+                            data-testid="select-budget"
+                          >
                             <SelectValue placeholder="Select budget range" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="5k-10k">$5,000 - $10,000</SelectItem>
-                          <SelectItem value="10k-25k">$10,000 - $25,000</SelectItem>
-                          <SelectItem value="25k-50k">$25,000 - $50,000</SelectItem>
+                          <SelectItem value="5k-10k">
+                            $5,000 - $10,000
+                          </SelectItem>
+                          <SelectItem value="10k-25k">
+                            $10,000 - $25,000
+                          </SelectItem>
+                          <SelectItem value="25k-50k">
+                            $25,000 - $50,000
+                          </SelectItem>
                           <SelectItem value="50k+">$50,000+</SelectItem>
                         </SelectContent>
                       </Select>
@@ -259,7 +327,9 @@ export default function Contact() {
                   </div>
                   <div>
                     <h3 className="font-semibold">Email</h3>
-                    <p className="text-muted-foreground">kolashankar113@gmail.com</p>
+                    <p className="text-muted-foreground">
+                      kolashankar113@gmail.com
+                    </p>
                   </div>
                 </div>
               </CardContent>
@@ -287,7 +357,9 @@ export default function Contact() {
                   </div>
                   <div>
                     <h3 className="font-semibold">Location</h3>
-                    <p className="text-muted-foreground">Kadapa, AndhraPradesh, India</p>
+                    <p className="text-muted-foreground">
+                      Kadapa, AndhraPradesh, India
+                    </p>
                   </div>
                 </div>
               </CardContent>
@@ -297,17 +369,47 @@ export default function Contact() {
               <CardContent className="p-6">
                 <h3 className="font-semibold mb-4">Follow Us</h3>
                 <div className="flex space-x-4">
-                  <button className="bg-primary/20 p-3 rounded-lg hover:bg-primary/30 transition-colors" data-testid="social-twitter">
-                    <Twitter className="h-5 w-5 text-primary" />
+                  <button
+                    className="bg-primary/20 p-3 rounded-lg hover:bg-primary/30 transition-colors"
+                    data-testid="social-twitter"
+                  >
+                    <a href="https://x.com/v4_edits" target="_blank">
+                      <Twitter className="h-5 w-5 text-primary" />
+                    </a>
                   </button>
-                  <button className="bg-accent/20 p-3 rounded-lg hover:bg-accent/30 transition-colors" data-testid="social-linkedin">
-                    <Linkedin className="h-5 w-5 text-accent" />
+
+                  <button
+                    className="bg-accent/20 p-3 rounded-lg hover:bg-accent/30 transition-colors"
+                    data-testid="social-linkedin"
+                  >
+                    <a
+                      href="https://www.linkedin.com/in/kola-shankar-315301306"
+                      target="_blank"
+                    >
+                      <Linkedin className="h-5 w-5 text-accent" />
+                    </a>
                   </button>
-                  <button className="bg-primary/20 p-3 rounded-lg hover:bg-primary/30 transition-colors" data-testid="social-github">
-                    <Github className="h-5 w-5 text-primary" />
+                  <button
+                    className="bg-primary/20 p-3 rounded-lg hover:bg-primary/30 transition-colors"
+                    data-testid="social-github"
+                  >
+                    <a
+                      href="https://www.github.com/kolashankar"
+                      target="_blank"
+                    >
+                      <Github className="h-5 w-5 text-primary" />
+                    </a>
                   </button>
-                  <button className="bg-accent/20 p-3 rounded-lg hover:bg-accent/30 transition-colors" data-testid="social-instagram">
-                    <Instagram className="h-5 w-5 text-accent" />
+                  <button
+                    className="bg-accent/20 p-3 rounded-lg hover:bg-accent/30 transition-colors"
+                    data-testid="social-instagram"
+                  >
+                    <a
+                      href="https://www.instagram.com/kolashankar_9999"
+                      target="_blank"
+                    >
+                      <Instagram className="h-5 w-5 text-accent" />
+                    </a>
                   </button>
                 </div>
               </CardContent>

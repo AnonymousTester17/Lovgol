@@ -76,9 +76,11 @@ export default function Home() {
       <Hero />
       <About />
 
-      {/* Place the VideoPlayer here, between About and Services */}
-      <div className="py-16">
-        <VideoPlayer />
+      {/* Centered Video Player with 70% width */}
+      <div className="py-16 flex justify-center">
+        <div className="w-[70%]">
+          <VideoPlayer />
+        </div>
       </div>
 
       <Services onServiceClick={handleServiceClick} />
