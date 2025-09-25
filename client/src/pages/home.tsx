@@ -75,12 +75,16 @@ export default function Home() {
       <Navigation />
       <Hero />
       <About />
+
+      {/* Place the VideoPlayer here, between About and Services */}
+      <div className="py-16">
+        <VideoPlayer />
+      </div>
+
       <Services onServiceClick={handleServiceClick} />
       <Clients />
       <Contact />
       <Footer />
-      
-      <VideoPlayer />
 
       <ServiceModal
         service={selectedService}
