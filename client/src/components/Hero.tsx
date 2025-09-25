@@ -35,7 +35,7 @@ export default function Hero() {
       <div 
         className="absolute inset-0 z-0"
         style={{
-          backgroundImage: 'url(https://pixabay.com/get/g6fe653a3f50d89d6b6d01ba22d868dca664379543f416234687d21ae225108b21471bbb3b3d8654816f462a27d0ed819657234187814d175872d0787fb24ae76_1280.jpg)',
+          // backgroundImage: 'url(https://pixabay.com/get/g6fe653a3f50d89d6b6d01ba22d868dca664379543f416234687d21ae225108b21471bbb3b3d8654816f462a27d0ed819657234187814d175872d0787fb24ae76_1280.jpg)',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           transform: `translateY(${offsetY * 0.5}px)`,

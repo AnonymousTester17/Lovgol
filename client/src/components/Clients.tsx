@@ -5,7 +5,7 @@ export default function Clients() {
   const testimonials = [
     {
       id: 1,
-      name: "Sarah Johnson",
+      name: "Harsha Vardhan",
       role: "CEO",
       company: "TechCorp",
       image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100",
@@ -14,7 +14,7 @@ export default function Clients() {
     },
     {
       id: 2,
-      name: "Emily Chen",
+      name: "Krishna Chaitanya",
       role: "Product Manager",
       company: "StartupX", 
       image: "https://images.unsplash.com/photo-1494790108755-2616b332c8c2?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100",
@@ -23,7 +23,7 @@ export default function Clients() {
     },
     {
       id: 3,
-      name: "Michael Rodriguez",
+      name: "Jayakrishna",
       role: "CTO",
       company: "InnovateLab",
       image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100",
@@ -32,7 +32,7 @@ export default function Clients() {
     },
     {
       id: 4,
-      name: "Lisa Wang",
+      name: "Varshini",
       role: "Founder",
       company: "DigitalFlow",
       image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100",
@@ -41,7 +41,7 @@ export default function Clients() {
     },
     {
       id: 5,
-      name: "David Kim",
+      name: "Hareesh",
       role: "VP Engineering",
       company: "CloudTech",
       image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100",

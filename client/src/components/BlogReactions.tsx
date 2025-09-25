@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Heart, MessageCircle, ThumbsUp, Star } from "lucide-react";
@@ -17,7 +16,10 @@ interface BlogReactionsProps {
   likeCount: number;
 }
 
-export default function BlogReactions({ postId, likeCount }: BlogReactionsProps) {
+export default function BlogReactions({
+  postId,
+  likeCount,
+}: BlogReactionsProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [showCommentForm, setShowCommentForm] = useState(false);
@@ -26,8 +28,8 @@ export default function BlogReactions({ postId, likeCount }: BlogReactionsProps)
   const [comment, setComment] = useState("");
 
   const { data: reactions = [], isLoading } = useQuery({
-    queryKey: ['/api/blog-reactions', { postId }],
-    queryFn: () => apiRequest("GET", `/api/blog-reactions?postId=${postId}`)
+    queryKey: ["/api/blog-reactions", { postId }],
+    queryFn: () => apiRequest("GET", `/api/blog-reactions?postId=${postId}`),
   });
 
   const reactionMutation = useMutation({
@@ -41,8 +43,8 @@ export default function BlogReactions({ postId, likeCount }: BlogReactionsProps)
       return await apiRequest("POST", "/api/blog-reactions", reactionData);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/blog-reactions'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/blog-posts'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/blog-reactions"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/blog-posts"] });
       toast({
         title: "Reaction added",
         description: "Thank you for your feedback!",
@@ -102,13 +104,20 @@ export default function BlogReactions({ postId, likeCount }: BlogReactionsProps)
     }
   };
 
-  const comments = reactions.filter((r: BlogReaction) => r.comment && r.comment.trim());
+  const comments = Array.isArray(reactions)
+    ? reactions.filter((r: BlogReaction) => r.comment && r.comment.trim())
+    : [];
 
   return (
-    <div className="mt-12 pt-8 border-t border-border" data-testid="blog-reactions">
+    <div
+      className="mt-12 pt-8 border-t border-border"
+      data-testid="blog-reactions"
+    >
       {/* Reaction Buttons */}
       <div className="mb-8">
-        <h3 className="text-lg font-semibold mb-4">What did you think of this post?</h3>
+        <h3 className="text-lg font-semibold mb-4">
+          What did you think of this post?
+        </h3>
         <div className="flex flex-wrap gap-3">
           <Button
             variant="outline"
@@ -152,7 +161,9 @@ export default function BlogReactions({ postId, likeCount }: BlogReactionsProps)
       {/* Comment Section */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold">Comments ({comments.length})</h3>
+          <h3 className="text-lg font-semibold">
+            Comments ({comments.length})
+          </h3>
           <Button
             onClick={() => setShowCommentForm(!showCommentForm)}
             variant={showCommentForm ? "outline" : "default"}
@@ -211,7 +222,9 @@ export default function BlogReactions({ postId, likeCount }: BlogReactionsProps)
                   disabled={reactionMutation.isPending}
                   data-testid="submit-comment-button"
                 >
-                  {reactionMutation.isPending ? "Submitting..." : "Submit Comment"}
+                  {reactionMutation.isPending
+                    ? "Submitting..."
+                    : "Submit Comment"}
                 </Button>
               </div>
             </CardContent>
@@ -222,17 +235,26 @@ export default function BlogReactions({ postId, likeCount }: BlogReactionsProps)
         {comments.length > 0 ? (
           <div className="space-y-4" data-testid="comments-list">
             {comments.map((reaction: BlogReaction) => (
-              <Card key={reaction.id} className="glass-card" data-testid={`comment-${reaction.id}`}>
+              <Card
+                key={reaction.id}
+                className="glass-card"
+                data-testid={`comment-${reaction.id}`}
+              >
                 <CardContent className="pt-4">
                   <div className="flex items-start justify-between mb-2">
                     <div>
-                      <p className="font-medium">{reaction.userName || "Anonymous"}</p>
+                      <p className="font-medium">
+                        {reaction.userName || "Anonymous"}
+                      </p>
                       <p className="text-sm text-muted-foreground">
-                        {new Date(reaction.createdAt).toLocaleDateString("en-US", {
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric"
-                        })}
+                        {new Date(reaction.createdAt).toLocaleDateString(
+                          "en-US",
+                          {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          },
+                        )}
                       </p>
                     </div>
                   </div>
@@ -253,12 +275,18 @@ export default function BlogReactions({ postId, likeCount }: BlogReactionsProps)
         <div className="mt-8 pt-6 border-t border-border">
           <h4 className="text-md font-medium mb-3">Reader Reactions</h4>
           <div className="flex flex-wrap gap-2">
-            {['like', 'love', 'insightful', 'helpful'].map((type) => {
-              const count = reactions.filter((r: BlogReaction) => r.reactionType === type).length;
+            {["like", "love", "insightful", "helpful"].map((type) => {
+              const count = reactions.filter(
+                (r: BlogReaction) => r.reactionType === type,
+              ).length;
               if (count === 0) return null;
-              
+
               return (
-                <Badge key={type} variant="secondary" className="flex items-center gap-1">
+                <Badge
+                  key={type}
+                  variant="secondary"
+                  className="flex items-center gap-1"
+                >
                   {getReactionIcon(type)}
                   <span className="capitalize">{type}</span>
                   <span>({count})</span>

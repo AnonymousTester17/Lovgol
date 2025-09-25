@@ -107,7 +107,7 @@ export default function About() {
           {/* Rolling Counters */}
           <div ref={countersRef} className="grid grid-cols-2 md:grid-cols-4 gap-8 py-8" data-testid="counters-section">
             <div className="text-center">
-              <div className="text-4xl font-bold text-primary counter" data-target="150" data-testid="counter-projects">
+              <div className="text-4xl font-bold text-primary counter" data-target="1500" data-testid="counter-projects">
                 0
               </div>
               <div className="text-muted-foreground">Projects</div>
@@ -119,7 +119,7 @@ export default function About() {
               <div className="text-muted-foreground">Clients</div>
             </div>
             <div className="text-center">
-              <div className="text-4xl font-bold text-primary counter" data-target="5" data-testid="counter-years">
+              <div className="text-4xl font-bold text-primary counter" data-target="1" data-testid="counter-years">
                 0
               </div>
               <div className="text-muted-foreground">Years</div>

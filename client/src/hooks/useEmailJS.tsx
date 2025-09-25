@@ -40,7 +40,7 @@ export function useEmailJS() {
         delivery_status: emailData.delivery_status,
         payment_status: emailData.payment_status,
         from_name: "LOVGOL Team",
-        reply_to: "hello@lovgol.com",
+        reply_to: "kolashankar113@gmail.com",
       };
 
       const response = await emailjs.send(
@@ -78,7 +78,7 @@ export function useEmailJS() {
         message: data.message,
         service: data.service || "Not specified",
         budget: data.budget || "Not specified",
-        to_email: "hello@lovgol.com", // Company email
+        to_email: "kolashankar113@gmail.com", // Company email
       };
 
       const response = await emailjs.send(
