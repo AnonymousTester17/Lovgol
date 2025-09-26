@@ -146,6 +146,13 @@ export const projects = pgTable("projects", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+export const admins = pgTable("admins", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  username: text("username").notNull().unique(),
+  password: text("password").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const insertServicePreviewSchema = createInsertSchema(servicesPreviews).omit({
   id: true,
   createdAt: true,
@@ -188,6 +195,11 @@ export const insertBlogReactionSchema = createInsertSchema(blogReactions).omit({
   createdAt: true,
 });
 
+export const insertAdminSchema = createInsertSchema(admins).omit({
+  id: true,
+  createdAt: true,
+});
+
 export type ServicePreview = typeof servicesPreviews.$inferSelect;
 export type InsertServicePreview = z.infer<typeof insertServicePreviewSchema>;
 export type ContactSubmission = typeof contactSubmissions.$inferSelect;
@@ -202,3 +214,5 @@ export type Project = typeof projects.$inferSelect;
 export type InsertProject = z.infer<typeof insertProjectSchema>;
 export type BlogReaction = typeof blogReactions.$inferSelect;
 export type InsertBlogReaction = z.infer<typeof insertBlogReactionSchema>;
+export type Admin = typeof admins.$inferSelect;
+export type InsertAdmin = z.infer<typeof insertAdminSchema>;

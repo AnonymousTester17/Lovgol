@@ -1,11 +1,25 @@
-import type { Express } from "express";
+import type { Express, Router } from "express";
+import express from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertServicePreviewSchema, insertContactSubmissionSchema, insertInquirySubmissionSchema, insertBlogPostSchema, insertCaseStudySchema, insertProjectSchema, insertBlogReactionSchema } from "@shared/schema";
+import { 
+  insertServicePreviewSchema, 
+  insertContactSubmissionSchema, 
+  insertInquirySubmissionSchema, 
+  insertBlogPostSchema, 
+  insertCaseStudySchema, 
+  insertProjectSchema, 
+  insertBlogReactionSchema 
+} from "@shared/schema";
+import passport from "passport";
+import { ensureAuthenticated } from "./auth";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
-  // Service Previews Routes
+  // --- PUBLIC API ROUTES ---
+  // These routes are accessible to everyone.
+
+  // Service Previews
   app.get("/api/service-previews", async (req, res) => {
     try {
       const { category, technology } = req.query;
@@ -37,51 +51,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/service-previews", async (req, res) => {
-    try {
-      const validatedData = insertServicePreviewSchema.parse(req.body);
-      const preview = await storage.createServicePreview(validatedData);
-      res.status(201).json(preview);
-    } catch (error) {
-      if (error instanceof Error) {
-        res.status(400).json({ message: error.message });
-      } else {
-        res.status(500).json({ message: "Failed to create service preview" });
-      }
-    }
-  });
-
-  app.put("/api/service-previews/:id", async (req, res) => {
-    try {
-      const validatedData = insertServicePreviewSchema.partial().parse(req.body);
-      const preview = await storage.updateServicePreview(req.params.id, validatedData);
-      res.json(preview);
-    } catch (error) {
-      if (error instanceof Error) {
-        if (error.message === "Service preview not found") {
-          res.status(404).json({ message: error.message });
-        } else {
-          res.status(400).json({ message: error.message });
-        }
-      } else {
-        res.status(500).json({ message: "Failed to update service preview" });
-      }
-    }
-  });
-
-  app.delete("/api/service-previews/:id", async (req, res) => {
-    try {
-      const deleted = await storage.deleteServicePreview(req.params.id);
-      if (!deleted) {
-        return res.status(404).json({ message: "Service preview not found" });
-      }
-      res.status(204).send();
-    } catch (error) {
-      res.status(500).json({ message: "Failed to delete service preview" });
-    }
-  });
-
-  // Contact Submissions Routes
+  // Contact & Inquiry Submissions
   app.post("/api/contact-submissions", async (req, res) => {
     try {
       const validatedData = insertContactSubmissionSchema.parse(req.body);
@@ -96,16 +66,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/contact-submissions", async (req, res) => {
-    try {
-      const submissions = await storage.getContactSubmissions();
-      res.json(submissions);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch contact submissions" });
-    }
-  });
-
-  // Inquiry Submissions Routes
   app.post("/api/inquiry-submissions", async (req, res) => {
     try {
       const validatedData = insertInquirySubmissionSchema.parse(req.body);
@@ -120,53 +80,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/inquiry-submissions", async (req, res) => {
-    try {
-      const submissions = await storage.getInquirySubmissions();
-      res.json(submissions);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch inquiry submissions" });
-    }
-  });
-
-  // Blog Posts Routes
+  // Blog Posts
   app.get("/api/blog-posts", async (req, res) => {
     try {
-      const { published } = req.query;
-      let posts;
-      
-      if (published === 'true') {
-        posts = await storage.getPublishedBlogPosts();
-      } else {
-        posts = await storage.getBlogPosts();
-      }
-      
+      const posts = await storage.getPublishedBlogPosts();
       res.json(posts);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch blog posts" });
     }
   });
 
-  app.get("/api/blog-posts/:id", async (req, res) => {
-    try {
-      const post = await storage.getBlogPost(req.params.id);
-      if (!post) {
-        return res.status(404).json({ message: "Blog post not found" });
-      }
-      res.json(post);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch blog post" });
-    }
-  });
-
   app.get("/api/blog-posts/slug/:slug", async (req, res) => {
     try {
       const post = await storage.getBlogPostBySlug(req.params.slug);
-      if (!post) {
+      if (!post || !post.isPublished) {
         return res.status(404).json({ message: "Blog post not found" });
       }
       
-      // Increment view count
       try {
         await storage.incrementBlogPostView(post.id);
       } catch (viewError) {
@@ -179,69 +109,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/blog-posts", async (req, res) => {
-    try {
-      const validatedData = insertBlogPostSchema.parse(req.body);
-      const post = await storage.createBlogPost(validatedData);
-      res.status(201).json(post);
-    } catch (error) {
-      if (error instanceof Error) {
-        res.status(400).json({ message: error.message });
-      } else {
-        res.status(500).json({ message: "Failed to create blog post" });
-      }
-    }
-  });
-
-  app.put("/api/blog-posts/:id", async (req, res) => {
-    try {
-      const validatedData = insertBlogPostSchema.partial().parse(req.body);
-      const post = await storage.updateBlogPost(req.params.id, validatedData);
-      res.json(post);
-    } catch (error) {
-      if (error instanceof Error) {
-        if (error.message === "Blog post not found") {
-          res.status(404).json({ message: error.message });
-        } else {
-          res.status(400).json({ message: error.message });
-        }
-      } else {
-        res.status(500).json({ message: "Failed to update blog post" });
-      }
-    }
-  });
-
-  app.delete("/api/blog-posts/:id", async (req, res) => {
-    try {
-      const deleted = await storage.deleteBlogPost(req.params.id);
-      if (!deleted) {
-        return res.status(404).json({ message: "Blog post not found" });
-      }
-      res.status(204).send();
-    } catch (error) {
-      res.status(500).json({ message: "Failed to delete blog post" });
-    }
-  });
-
-  // Case Studies Routes
+  // Case Studies
   app.get("/api/case-studies", async (req, res) => {
     try {
       const caseStudies = await storage.getCaseStudies();
       res.json(caseStudies);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch case studies" });
-    }
-  });
-
-  app.get("/api/case-studies/:id", async (req, res) => {
-    try {
-      const caseStudy = await storage.getCaseStudy(req.params.id);
-      if (!caseStudy) {
-        return res.status(404).json({ message: "Case study not found" });
-      }
-      res.json(caseStudy);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch case study" });
     }
   });
 
@@ -256,73 +130,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to fetch case study" });
     }
   });
-
-  app.post("/api/case-studies", async (req, res) => {
-    try {
-      const validatedData = insertCaseStudySchema.parse(req.body);
-      const caseStudy = await storage.createCaseStudy(validatedData);
-      res.status(201).json(caseStudy);
-    } catch (error) {
-      if (error instanceof Error) {
-        res.status(400).json({ message: error.message });
-      } else {
-        res.status(500).json({ message: "Failed to create case study" });
-      }
-    }
-  });
-
-  app.put("/api/case-studies/:id", async (req, res) => {
-    try {
-      const validatedData = insertCaseStudySchema.partial().parse(req.body);
-      const caseStudy = await storage.updateCaseStudy(req.params.id, validatedData);
-      res.json(caseStudy);
-    } catch (error) {
-      if (error instanceof Error) {
-        if (error.message === "Case study not found") {
-          res.status(404).json({ message: error.message });
-        } else {
-          res.status(400).json({ message: error.message });
-        }
-      } else {
-        res.status(500).json({ message: "Failed to update case study" });
-      }
-    }
-  });
-
-  app.delete("/api/case-studies/:id", async (req, res) => {
-    try {
-      const deleted = await storage.deleteCaseStudy(req.params.id);
-      if (!deleted) {
-        return res.status(404).json({ message: "Case study not found" });
-      }
-      res.status(204).send();
-    } catch (error) {
-      res.status(500).json({ message: "Failed to delete case study" });
-    }
-  });
-
-  // Projects Routes
-  app.get("/api/projects", async (req, res) => {
-    try {
-      const projects = await storage.getProjects();
-      res.json(projects);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch projects" });
-    }
-  });
-
-  app.get("/api/projects/:id", async (req, res) => {
-    try {
-      const project = await storage.getProject(req.params.id);
-      if (!project) {
-        return res.status(404).json({ message: "Project not found" });
-      }
-      res.json(project);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch project" });
-    }
-  });
-
+  
+  // Client Project View
   app.get("/api/client-project/:token", async (req, res) => {
     try {
       const project = await storage.getProjectByToken(req.params.token);
@@ -353,77 +162,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/projects", async (req, res) => {
-    try {
-      const validatedData = insertProjectSchema.parse(req.body);
-      const project = await storage.createProject(validatedData);
-      res.status(201).json(project);
-    } catch (error) {
-      if (error instanceof Error) {
-        res.status(400).json({ message: error.message });
-      } else {
-        res.status(500).json({ message: "Failed to create project" });
-      }
-    }
-  });
-
-  app.put("/api/projects/:id", async (req, res) => {
-    try {
-      const validatedData = insertProjectSchema.partial().parse(req.body);
-      const oldProject = await storage.getProject(req.params.id);
-      const project = await storage.updateProject(req.params.id, validatedData);
-      
-      // Check if progress was updated and send email notification
-      if (oldProject && validatedData.progressPercentage && 
-          oldProject.progressPercentage !== validatedData.progressPercentage) {
-        
-        // Prepare email data for client notification
-        const clientLink = `${req.protocol}://${req.get('host')}/client-project/${project.clientAccessToken}`;
-        const emailData = {
-          to_email: project.clientEmail,
-          to_name: project.clientName,
-          project_title: project.title,
-          progress_percentage: project.progressPercentage,
-          progress_description: project.progressDescription || 'No additional details provided.',
-          client_link: clientLink,
-          estimated_delivery: project.estimatedDeliveryDays,
-          project_health: project.projectHealth,
-          delivery_status: project.deliveryStatus,
-          payment_status: project.paymentStatus,
-        };
-
-        // Set flag to indicate email should be sent from frontend
-        (project as any).shouldSendEmail = true;
-        (project as any).emailData = emailData;
-      }
-      
-      res.json(project);
-    } catch (error) {
-      if (error instanceof Error) {
-        if (error.message === "Project not found") {
-          res.status(404).json({ message: error.message });
-        } else {
-          res.status(400).json({ message: error.message });
-        }
-      } else {
-        res.status(500).json({ message: "Failed to update project" });
-      }
-    }
-  });
-
-  app.delete("/api/projects/:id", async (req, res) => {
-    try {
-      const deleted = await storage.deleteProject(req.params.id);
-      if (!deleted) {
-        return res.status(404).json({ message: "Project not found" });
-      }
-      res.status(204).send();
-    } catch (error) {
-      res.status(500).json({ message: "Failed to delete project" });
-    }
-  });
-
-  // Blog Reactions Routes
+  // Blog Reactions
   app.get("/api/blog-reactions", async (req, res) => {
     try {
       const { postId } = req.query;
@@ -454,6 +193,189 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     }
   });
+
+
+  // --- AUTHENTICATION ROUTES ---
+  app.post('/api/login', passport.authenticate('local'), (req, res) => {
+    res.json({ message: 'Logged in successfully', user: req.user });
+  });
+
+  app.post('/api/logout', (req, res, next) => {
+    req.logout((err) => {
+      if (err) { return next(err); }
+      res.json({ message: 'Logged out successfully' });
+    });
+  });
+
+  app.get('/api/auth/status', (req, res) => {
+    res.json({ isAuthenticated: req.isAuthenticated() });
+  });
+
+
+  // --- ADMIN PROTECTED ROUTES ---
+  const adminRouter: Router = express.Router();
+  adminRouter.use(ensureAuthenticated);
+  
+  // Service Previews (Admin)
+  adminRouter.post("/service-previews", async (req, res) => {
+    try {
+      const validatedData = insertServicePreviewSchema.parse(req.body);
+      const preview = await storage.createServicePreview(validatedData);
+      res.status(201).json(preview);
+    } catch (error) {
+        res.status(400).json({ message: (error as Error).message });
+    }
+  });
+  
+  adminRouter.put("/service-previews/:id", async (req, res) => {
+    try {
+      const validatedData = insertServicePreviewSchema.partial().parse(req.body);
+      const preview = await storage.updateServicePreview(req.params.id, validatedData);
+      res.json(preview);
+    } catch (error) {
+        res.status(400).json({ message: (error as Error).message });
+    }
+  });
+  
+  adminRouter.delete("/service-previews/:id", async (req, res) => {
+    try {
+      await storage.deleteServicePreview(req.params.id);
+      res.status(204).send();
+    } catch (error) {
+        res.status(500).json({ message: "Failed to delete service preview" });
+    }
+  });
+
+  // Submissions (Admin)
+  adminRouter.get("/contact-submissions", async (req, res) => {
+    try {
+      const submissions = await storage.getContactSubmissions();
+      res.json(submissions);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch contact submissions" });
+    }
+  });
+
+  adminRouter.get("/inquiry-submissions", async (req, res) => {
+    try {
+      const submissions = await storage.getInquirySubmissions();
+      res.json(submissions);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch inquiry submissions" });
+    }
+  });
+
+  // Blog Posts (Admin)
+  adminRouter.get("/blog-posts", async (req, res) => {
+    try {
+      const posts = await storage.getBlogPosts(); // Get all posts, including drafts
+      res.json(posts);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch blog posts" });
+    }
+  });
+  
+  adminRouter.post("/blog-posts", async (req, res) => {
+    try {
+      const validatedData = insertBlogPostSchema.parse(req.body);
+      const post = await storage.createBlogPost(validatedData);
+      res.status(201).json(post);
+    } catch (error) {
+      res.status(400).json({ message: (error as Error).message });
+    }
+  });
+  
+  adminRouter.put("/blog-posts/:id", async (req, res) => {
+    try {
+      const validatedData = insertBlogPostSchema.partial().parse(req.body);
+      const post = await storage.updateBlogPost(req.params.id, validatedData);
+      res.json(post);
+    } catch (error) {
+      res.status(400).json({ message: (error as Error).message });
+    }
+  });
+  
+  adminRouter.delete("/blog-posts/:id", async (req, res) => {
+    try {
+      await storage.deleteBlogPost(req.params.id);
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete blog post" });
+    }
+  });
+
+  // Case Studies (Admin)
+  adminRouter.post("/case-studies", async (req, res) => {
+    try {
+      const validatedData = insertCaseStudySchema.parse(req.body);
+      const caseStudy = await storage.createCaseStudy(validatedData);
+      res.status(201).json(caseStudy);
+    } catch (error) {
+      res.status(400).json({ message: (error as Error).message });
+    }
+  });
+
+  adminRouter.put("/case-studies/:id", async (req, res) => {
+    try {
+      const validatedData = insertCaseStudySchema.partial().parse(req.body);
+      const caseStudy = await storage.updateCaseStudy(req.params.id, validatedData);
+      res.json(caseStudy);
+    } catch (error) {
+      res.status(400).json({ message: (error as Error).message });
+    }
+  });
+
+  adminRouter.delete("/case-studies/:id", async (req, res) => {
+    try {
+      await storage.deleteCaseStudy(req.params.id);
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete case study" });
+    }
+  });
+
+  // Projects (Admin)
+  adminRouter.get("/projects", async (req, res) => {
+    try {
+      const projects = await storage.getProjects();
+      res.json(projects);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch projects" });
+    }
+  });
+  
+  adminRouter.post("/projects", async (req, res) => {
+    try {
+      const validatedData = insertProjectSchema.parse(req.body);
+      const project = await storage.createProject(validatedData);
+      res.status(201).json(project);
+    } catch (error) {
+      res.status(400).json({ message: (error as Error).message });
+    }
+  });
+
+  adminRouter.put("/projects/:id", async (req, res) => {
+    try {
+      const validatedData = insertProjectSchema.partial().parse(req.body);
+      const project = await storage.updateProject(req.params.id, validatedData);
+      res.json(project);
+    } catch (error) {
+      res.status(400).json({ message: (error as Error).message });
+    }
+  });
+
+  adminRouter.delete("/projects/:id", async (req, res) => {
+    try {
+      await storage.deleteProject(req.params.id);
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete project" });
+    }
+  });
+
+  // Register the admin router
+  app.use('/api/admin', adminRouter);
+
 
   const httpServer = createServer(app);
   return httpServer;

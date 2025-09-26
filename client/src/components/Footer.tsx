@@ -110,19 +110,31 @@ export default function Footer() {
                 className="text-muted-foreground hover:text-primary transition-colors"
                 data-testid="footer-social-twitter"
               >
+                <a href="https://x.com/v4_edits" target="_blank">
                 <Twitter className="h-5 w-5" />
+                </a>
               </button>
               <button 
                 className="text-muted-foreground hover:text-primary transition-colors"
                 data-testid="footer-social-linkedin"
               >
+                <a
+                      href="https://www.linkedin.com/in/kola-shankar-315301306"
+                      target="_blank"
+                    >
                 <Linkedin className="h-5 w-5" />
+                </a>
               </button>
               <button 
                 className="text-muted-foreground hover:text-primary transition-colors"
                 data-testid="footer-social-github"
               >
+                <a
+                      href="https://www.github.com/kolashankar"
+                      target="_blank"
+                    >
                 <Github className="h-5 w-5" />
+                </a>
               </button>
             </div>
           </div>

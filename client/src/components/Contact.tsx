@@ -364,7 +364,7 @@ export default function Contact() {
                 </div>
               </CardContent>
             </Card>
-
+            
             <Card className="glass-card" data-testid="social-media">
               <CardContent className="p-6">
                 <h3 className="font-semibold mb-4">Follow Us</h3>

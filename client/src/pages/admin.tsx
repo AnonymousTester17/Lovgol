@@ -13,6 +13,9 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import type { ServicePreview, CaseStudy, Project, BlogPost } from "@shared/schema";
 
+import { useLocation } from "wouter";
+import { LogOut } from "lucide-react";
+
 export default function Admin() {
   const [editingService, setEditingService] = useState<ServicePreview | null>(null);
   const [editingCaseStudy, setEditingCaseStudy] = useState<CaseStudy | null>(null);
@@ -217,6 +220,25 @@ export default function Admin() {
     deleteBlogPostMutation.mutate(id);
   };
 
+
+  const [, setLocation] = useLocation();
+
+  const logoutMutation = useMutation({
+    mutationFn: () => {
+      return apiRequest("POST", "/api/logout");
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/status"] });
+      setLocation("/login");
+    },
+  });
+
+  const handleLogout = () => {
+    logoutMutation.mutate();
+  };
+
+
+
   return (
     <div className="min-h-screen bg-background text-foreground p-8" data-testid="admin-page">
       <div className="max-w-7xl mx-auto">
@@ -247,6 +269,16 @@ export default function Admin() {
               <Plus className="mr-2 h-4 w-4" />
               Add Project
             </Button>
+
+            <Button
+              onClick={handleLogout}
+              variant="outline"
+              size="icon"
+              disabled={logoutMutation.isPending}
+            >
+              <LogOut className="h-4 w-4" />
+            </Button>
+            
           </div>
         </div>
 
